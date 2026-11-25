@@ -11,6 +11,9 @@ for f in data_in/*.json; do
   esac
 done
 [ -f pib/summary.json ] || cp fallback/summary.json pib/summary.json
+for n in $(python3 -c "import json;print(' '.join(k[:-5] for k in json.load(open('sources.json'))['sheets_to_xlsx']))"); do
+  [ -f "data/$n.json" ] || { echo "using yesterday's copy of $n"; cp "fallback/$n.json" "data/$n.json"; }
+done
 for k in nfms rdss; do
   url=$(python3 -c "import json;print(json.load(open('sources.json'))['${k}_latest'])")
   curl -sf "$url" -o "ext/${k}_latest.json" && cp "ext/${k}_latest.json" "fallback/${k}_latest.json" || cp "fallback/${k}_latest.json" "ext/${k}_latest.json"
@@ -18,4 +21,5 @@ done
 if [ -f ../docs/news/clips.json ]; then python3 news_index.py; else cp ../docs/news/news_index.json news/news_index.json; fi
 python3 build_review.py
 cp review.json ../docs/review.json
+for f in data_in/*.json; do n=$(basename "$f"); [ "$n" = dm_feedback.json ] && continue; [ "$n" = summary.json ] && { cp "$f" fallback/summary.json; continue; }; cp "$f" "fallback/$n"; done
 cp news/news_index.json ../docs/news/news_index.json

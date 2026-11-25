@@ -4,7 +4,7 @@ name: Build All-Agenda Review
 on:
   push:
     branches: [main]
-    paths: ['build/data_in/**', 'docs/news/clips.json']
+    paths: ['build/data_in/**', 'docs/news/clips.json', 'build/build_from_inputs.sh']
   workflow_dispatch: {}
 
 permissions:
