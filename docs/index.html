@@ -85,6 +85,19 @@ td .g{display:block;color:var(--fnt);font-size:11.5px}
 @keyframes sp{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spin{animation:none}}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:0 8px 28px rgba(16,24,40,.14);display:none;z-index:40;max-width:92vw}
 .hide{display:none!important}
+.plist{display:flex;flex-direction:column}
+.pq{border-top:1px solid var(--line)}.pq:first-child{border-top:0}
+.pq>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:10px 4px;font-size:15.5px;line-height:1.4}
+.pq>summary::-webkit-details-marker{display:none}
+.pq>summary::before{content:'›';color:var(--fnt);font-weight:800;transition:transform .15s;flex:none;width:10px}
+.pq[open]>summary::before{transform:rotate(90deg)}
+.pq>summary:hover .phead{color:var(--td)}
+.ptag{flex:none;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--c) 40%,#fff);background:color-mix(in srgb,var(--c) 10%,#fff);color:color-mix(in srgb,var(--c) 75%,#1d2433)}
+.phead{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pq[open] .phead{white-space:normal}
+.pbody2{padding:2px 4px 14px 24px;font-size:15px;line-height:1.55}
+.pbody2 .item{border:0;padding:0;margin:0;background:none;font-size:15px}.pbody2 .w{font-size:13.5px;margin-top:4px}
+@media(max-width:600px){.pq>summary{flex-wrap:wrap;font-size:15px}.phead{white-space:normal}}
 .news{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:10px;align-items:start}.news.sm{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .clip{border:1px solid var(--line);border-radius:9px;background:#fff;padding:6px;cursor:zoom-in;text-align:left;font:inherit;display:flex;flex-direction:column;gap:4px}
 .clip img{width:100%;height:auto;max-height:340px;object-fit:contain;object-position:top;border-radius:5px;background:#fafafa}.news.sm .clip img{max-height:170px}
@@ -108,8 +121,6 @@ td .g{display:block;color:var(--fnt);font-size:11.5px}
 .pres.fit .pbody>.slide{max-width:none}
 .pres.fit .pgrid{display:block;columns:5 360px;column-gap:10px}.pres.fit .pgrid>.agbox{break-inside:avoid;display:inline-block;width:100%;margin:0 0 10px}
 .pgrid .agbox{margin-top:0}
-.pbox .pi{border-top:1px solid var(--trk);padding:5px 0}.pbox .pi:first-of-type{border-top:0}.pbox .pt{display:block;font-size:11px;font-weight:700;color:#8a6d3b;text-transform:none}
-.pbox .item{border:0;padding:0;margin:0;background:none;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.pbox .item .w{font-size:12px}
 .ptb{margin-top:10px}.ptb .mini{border:0;padding:0}.ptb .mini>h4{font-size:13px;color:var(--mut);margin:0 0 6px}
 .ptb .mini{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.ptb .mini>h4{grid-column:1/-1}.ptb .mini .rbox+.rbox{margin-top:0}
 @media(max-width:600px){.ptb .mini{grid-template-columns:1fr}}.pgrid .agbox .kfs{margin-bottom:0}
@@ -359,6 +370,17 @@ function newsHtml(dt, cls = '') {
   const N = newsOf(dt); if (!N.length) return '';
   return `<div class="news ${cls}">${N.map((c, i) => `<button class="clip" data-clip="${esc(dt)}|${i}" title="Open the clipping"><img src="${esc(c.f)}" alt="News clipping, ${esc(c.place)}, page ${c.p}" loading="lazy" width="${c.w}" height="${c.h}">${c.hl ? `<b class="hl">${esc(c.hl)}</b>` : ''}<span>${esc(c.place)} · page ${c.p}</span></button>`).join('')}</div>`;
 }
+function pendList(items, max) {
+  const show = max ? items.slice(0, max) : items;
+  return `<div class="plist">${show.map(it => {
+    const full = itemHtml(it), box = document.createElement('div'); box.innerHTML = full;
+    const it0 = box.querySelector('.item') || box, b0 = it0.querySelector('b');
+    const head = (b0?.textContent || box.textContent || '').trim();
+    if (b0) { b0.remove(); const t = it0.firstChild; if (t && t.nodeType === 3) t.textContent = t.textContent.replace(/^[\s·|,:-]+/, ''); }
+    return `<details class="pq"><summary><span class="ptag" style="--c:${COL[it.src] || '#8a6d3b'}">${esc(PT[it.src] || R.AG[it.src]?.t || '')}</span><span class="phead">${esc(head)}</span></summary><div class="pbody2">${box.innerHTML}</div></details>`;
+  }).join('')}</div>${max && items.length > max ? `<div class="sub" style="margin-top:8px">and ${items.length - max} more in the District review tab</div>` : ''}`;
+}
+const PT = {dpi: 'District issue', dmfb: 'DM feedback', utility: 'Utility shifting', pss: 'PSS', electro: 'Electrocution', offgrid: 'OffGrid', pmsg: 'PMSG', ula: 'PMSG ULA', nsc: 'NSC', c1912: '1912', outage: 'Outage', revenue: 'Revenue', cmd: 'CMD Cell'};
 function itemHtml(it) {
   const dv = it.v ? titled(R.H.divisions[it.v]?.n || '') : '';
   switch (it.k) {
@@ -430,7 +452,7 @@ function drawDistrict() {
       ${kf}${dTab}${ula}${vTab}${five ? `<div class="five">${five}</div>` : ''}${items ? `<div class="its">${items}</div>` : ''}</section>`;
   }).join('');
   const cmd = (R.AG.cmd.items[dt] || []).map(itemHtml).join('');
-  const pend = (R.PEND[dt] || []).map(itemHtml).join('');
+  const pend = (R.PEND[dt] || []).length ? pendList(R.PEND[dt]) : '';
   $('main').innerHTML = `<div class="nav2"><button class="btn" id="prev" ${idx <= 0 ? 'disabled' : ''}>‹ Previous</button><select id="dsel" aria-label="District">${opts}</select>
     <button class="btn main" id="next" ${idx >= distOrder.length - 1 ? 'disabled' : ''}>Next ›</button><span class="crumb">${esc(scope)} › ${esc(H.circles[D.pc]?.n || '')} circle › <b>${esc(D.n)}</b> · ${idx + 1} of ${distOrder.length}</span></div>
    <div class="dhd"><div><h1>${esc(D.n)}</h1><div class="row" style="margin-top:6px">${[...new Set(circles.map(c => H.circles[c].d))].map(d => `<span class="chip ${d === 'SBPDCL' ? 'sb' : 'nb'}">${d}</span>`).join('')}
@@ -438,7 +460,7 @@ function drawDistrict() {
      <button class="btn main" id="dpdf"><span>PDF of ${esc(D.n)}</span></button></div>
    <div class="tiles">${tiles.join('')}</div>
    ${offs.length ? `<h2>Officers to review with</h2><div class="offs">${offs.map(([u, o]) => `<div class="off"><span class="sub">${esc(u)}</span><b>${esc(o.p)} · ${esc(o.n)}</b>${o.m ? `<span class="num">${esc(o.m)}</span>` : ''}</div>`).join('')}</div>` : ''}
-   ${pend ? `<h2>Pending issues</h2><div class="card">${pend}</div>` : ''}
+   ${pend ? `<h2>Pending issues <span class="sub">${(R.PEND[dt] || []).length} open · click an issue to read it in full</span></h2><div class="card">${pend}</div>` : ''}
    ${newsOf(dt).length ? `<h2>${esc(D.n)} in the news <span class="sub">${esc(R.NEWS.paper)}, ${esc(R.NEWS.date)}</span></h2><div class="card">${newsHtml(dt)}</div>` : ''}
    <h2>Agenda by agenda, division to section</h2>${secHtml}
    ${cmd ? `<h2>${esc(D.n)} in the CMD Cell agenda</h2><div class="card">${cmd}</div>` : ''}
@@ -696,8 +718,8 @@ function pDistrict(dt) {
   circles.forEach(c => (R.OFF[c] || []).forEach(o => offs.push(o.p + ' ' + o.n + (o.m ? ' (' + o.m + ')' : ''))));
   if (divs.length <= 4) divs.forEach(v => (R.OFF[v] || []).forEach(o => offs.push(o.p + ' ' + titled(H.divisions[v].n) + ': ' + o.n)));
   const PA = R.PEND[dt] || [];
-  const pend = PA.slice(0, 8).map(it => `<div class="pi"><span class="pt">${esc(R.AG[it.src]?.t || '')}</span>${itemHtml(it)}</div>`).join('');
-  const pendBox = PA.length ? `<section class="agbox pbox" style="--c:#8a6d3b"><div class="sechd"><h3>Pending issues</h3><span class="sub">${PA.length} open</span></div>${pend}${PA.length > 8 ? `<div class="sub" style="margin-top:6px">and ${PA.length - 8} more in the District review tab</div>` : ''}</section>` : '';
+  const pend = pendList(PA, 10);
+  const pendBox = PA.length ? `<section class="agbox pbox" style="--c:#8a6d3b"><div class="sechd"><h3>Pending issues</h3><span class="sub">${PA.length} open</span></div>${pend}</section>` : '';
   return `<div class="slide"><div class="shd"><div><h1>${esc(D.n)}</h1><div class="sub" style="margin-top:4px">${circles.map(c => esc(H.circles[c].n) + ' circle (' + esc(H.circles[c].d) + ')').join(', ')} · ${divs.length} division${divs.length > 1 ? 's' : ''}</div></div>
     ${offs.length ? `<div class="sub" style="max-width:820px">${offs.map(esc).join(' · ')}</div>` : ''}</div>
     <div class="pgrid">${boxes}${pendBox}${newsOf(dt).length ? `<section class="agbox" style="--c:#3b6e8f"><div class="sechd"><h3>In the news</h3><span class="sub">${esc(R.NEWS.date)} · ${newsOf(dt).length} clipping${newsOf(dt).length > 1 ? 's' : ''}</span></div>${newsHtml(dt, 'sm')}</section>` : ''}</div></div>`;

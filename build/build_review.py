@@ -218,7 +218,7 @@ a = agenda('ula', 'PMSG-MBY (ULA)', 'Daily Progress Report of PM Surya Ghar Yojn
     key=['str', 'pan', 'inv', 'y', 'upd', 'ca', 'pi', 'pi7'])
 ws = book('pmsg_ula.xlsx')['CMDDashboard']
 hdr1 = [txt(c) for c in next(ws.iter_rows(min_row=1, max_row=1, values_only=True))]
-ula_date = re.search(r'Installed Yesterday \((\d\d\.\d\d\.\d{4})\)', ' '.join(hdr1))
+ula_date = re.search(r'Installed (?:Yesterday|Today) \((\d\d)\.(\d\d)\.(\d{4})\)', ' '.join(hdr1))
 agency = ''
 for r in ws.iter_rows(min_row=3, values_only=True):
     if r[0]: agency = txt(r[0])
@@ -232,7 +232,7 @@ for r in book('pmsg_ula.xlsx')['Inspections'].iter_rows(min_row=2, values_only=T
     dt = tag.district(txt(r[0])) if r and r[0] else None
     if dt and dt in a['L'].get('district', {}): put(a, 'district', dt, dict(pi7=num(r[5])))
 finish(a, lambda b: dict(pt=pct(b['inv'], b['tgt']), pp=pct(b['upd'], b['inv'])))
-a['asof'] = ula_date.group(1).replace('.', '-') if ula_date else ''
+a['asof'] = datetime.date(int(ula_date.group(3)), int(ula_date.group(2)), int(ula_date.group(1))).strftime('%d %b %Y') if ula_date else ''
 
 # ================================================================ 3. 1912 complaints
 a = agenda('c1912', '1912 Complaint Analytics', 'Customer Call Centre - 1912', '', [
@@ -505,7 +505,7 @@ for r in book('offgrid.xlsx')['EnergyAccounting'].iter_rows(min_row=4, values_on
             if not named or dt in named: mine.append(x)
         put(a, 'district', dt, dict(hh=num(r[4]) / len(ds), done=num(r[5]) / len(ds), v=num(r[3]) / len(ds), noc=0))
         for x in mine:
-            if not any(i.get('txt') == x[:420] for i in a['items'][dt]): a['items'][dt].append(dict(k='noc', proj=last['proj'], txt=x[:420]))
+            if not any(i.get('txt') == x[:2000] for i in a['items'][dt]): a['items'][dt].append(dict(k='noc', proj=last['proj'], txt=x[:2000]))
         a['items'][dt].append(dict(k='offgrid', proj=last['proj'], vill=num(r[3]), hh=num(r[4]), done=num(r[5]), st=last['st'][:500], iss=last['iss'][:400]))
 for dt, b in a['L']['district'].items(): b['noc'] = sum(1 for i in a['items'].get(dt, []) if i['k'] == 'noc')
 finish(a, lambda b: dict(dp=pct(b['done'], b['hh'])))
@@ -563,7 +563,7 @@ for ws in book('cmd_cell.xlsx').worksheets:
             sig_ = (dt, line[:120])
             if sig_ in seen: continue
             seen.add(sig_)
-            a['items'][dt].append(dict(k='cmd', tab=re.sub(r'^\d+[a-z]?[_.]\s*', '', ws.title).strip(), txt=re.sub(r'\s+', ' ', line)[:420]))
+            a['items'][dt].append(dict(k='cmd', tab=re.sub(r'^\d+[a-z]?[_.]\s*', '', ws.title).strip(), txt=re.sub(r'\s+', ' ', line)[:2000]))
 for dt in list(a['items']):
     if dt.startswith('DT'):
         a['items'][dt] = a['items'][dt][:12]
