@@ -1,0 +1,84 @@
+{
+ "artifact_slug": "6f264e8a-d0ea-4cb9-9134-b111c213743c",
+ "sheets_to_xlsx": {
+  "c1912.xlsx": "1MyjzcCz-IUs1GNEtKQHHohRwtG-FEhpFirb4uAWrguU",
+  "outage.xlsx": "19cDJxYkrnSSUBB30-IMztkg-9sCtZhxd0aD4iFo29rA",
+  "revenue.xlsx": "1nbkHaVm0eNDoz7xL5vRpQ60QqfZid3_1ZkMTjqcLLWo",
+  "nsc.xlsx": "1lmx8BaG7WW_hHfG5d_zcbgeY6caHCkFVJNIV2_BOaMY",
+  "pmsg_regular.xlsx": "1SGSTSGNwcolOtdoGjtKFv7NxN3MCh-05nM0j3jRtuuI",
+  "pmsg_ula.xlsx": "1aSsrArGFTplJsWZL5HAjoiAPgsjSQU3Vyd7F51uXxDM",
+  "utility.xlsx": "1hUYR8fhvOWFag3vuLL7to5Iqmybhy-OLeeLvz4qCJFw",
+  "pss_projects.xlsx": "1K6Mh4wfoJEW5IcSAaDc9YF0xN5WqGKFy_y_JQONvGdU",
+  "electrocution.xlsx": "10HK2DmvM8JYcFpnQmO9SrKQwSrh0s4qbqY3xQpIEVm0",
+  "offgrid.xlsx": "1ZSyBMvGlivLk3sk5WBIjpQqhEhjIwSnkjaUHTVSUXG4",
+  "cmd_cell.xlsx": "1ykQTXA207fqsz3Tc_9tKF1xWN0FkoP0vnzGt3zua8Ek"
+ },
+ "dm_feedback_sheet": {
+  "id": "18aCnpOGBAnBOGtDLhHGS6v4woMWccmTAmvRL7xYVOeg",
+  "range": "Issues!A1:R500",
+  "save_as": "data/dm_feedback.json"
+ },
+ "pending_issues_json": {
+  "id": "1XS03gRoap-XsGAYXL1JazVFRtaRWAKNm",
+  "save_as": "pib/summary.json"
+ },
+ "news_prepared_folder": "1aD89nFkBOVVDVPfFLFrg8UdPIu2H17Hi",
+ "nfms_latest": "https://raw.githubusercontent.com/mdsbpdcl-hub/nfms-bihar/main/data/latest.json",
+ "rdss_latest": "https://raw.githubusercontent.com/mdsbpdcl-hub/rdss-bihar-data/main/data/latest.json",
+ "fallback_sheets": {
+  "c1912.xlsx": [
+   "DB_CIRCLE",
+   "DB_DIVCAT",
+   "DB_DIVISION",
+   "DB_GEO",
+   "DB_KPI",
+   "DB_META",
+   "DB_REPEATS",
+   "DB_SECTION"
+  ],
+  "outage.xlsx": [
+   "SBPDCL Summary",
+   "SBPDCL Circle",
+   "SBPDCL Division",
+   "SBPDCL Substation",
+   "SBPDCL Over 24 Hrs Left Out",
+   "NBPDCL Summary",
+   "NBPDCL Circle",
+   "NBPDCL Division",
+   "NBPDCL Substation",
+   "NBPDCL Over 24 Hrs Left Out"
+  ],
+  "revenue.xlsx": [
+   "SBPDCL_Sections",
+   "NBPDCL_Sections"
+  ],
+  "nsc.xlsx": [
+   "Analysis Summary",
+   "North - NSC <19 kW",
+   "South - NSC <19 kW",
+   "North - NSC 19-59 kW",
+   "South - NSC 19-59 kW",
+   "North - Load Change",
+   "South - Load Change"
+  ],
+  "pmsg_ula.xlsx": [
+   "CMDDashboard",
+   "Inspections"
+  ],
+  "pmsg_regular.xlsx": [
+   "District KPIs",
+   "Division KPIs",
+   "Headline KPIs",
+   "Recent progress",
+   "Sub-division KPIs"
+  ],
+  "pss_projects.xlsx": [
+   "RDSSPSS",
+   "StatePlanPSS"
+  ],
+  "cmd_cell.xlsx": [],
+  "offgrid.xlsx": [],
+  "electrocution.xlsx": [],
+  "utility.xlsx": []
+ }
+}

@@ -1,0 +1,9 @@
+build/data/
+build/news_raw/
+build/news/
+build/ext/
+build/pib/
+build/review.json
+build/fetch_report.json
+build/__pycache__/
+docs/news.new/

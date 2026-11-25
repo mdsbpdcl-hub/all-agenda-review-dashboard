@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All-Agenda Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a review room's working sheet – calm, exact, figures first.
+   IDEA: the MD's meeting file – overview, then one district after another, circle by circle.
+   PICTURE: ranked top/bottom lists and the district's headline tiles.
+   COLOUR and TYPE: My Dashboard Style – light, Nunito, scope colours.
+   LAYOUT: sticky header, three tabs, cards in a 1360px column. */
+:root{--t1:#E8894A;--t2:#F5B98C;--tl:#FDEDE0;--td:#8A4513;--ink:#1d2433;--mut:#667085;--fnt:#98a2b3;--line:#e7eaf0;--trk:#eef0f5;--bg:#f3f5f9;--sb:#2a78d6;--nb:#eb6834;color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+html,body{overflow-x:clip}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Nunito,"Segoe UI",system-ui,sans-serif}
+button,select,input{font:inherit;color:inherit}
+.num{font-variant-numeric:lining-nums tabular-nums}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.hin{max-width:1360px;margin:auto;padding:10px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.badge{width:40px;height:40px;border-radius:11px;background:var(--tl);border:1px solid var(--t2);display:grid;place-items:center;flex:none}
+.ttl{flex:1 1 220px}.ttl b{display:block;font-size:18px;font-weight:800;letter-spacing:-.01em}.ttl span{color:var(--mut);font-size:13px}
+.pills{display:flex;gap:4px;background:var(--trk);padding:3px;border-radius:999px}
+.pills button{border:1px solid transparent;background:none;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:700;color:var(--mut);min-height:36px}
+.pills button.on{background:var(--tl);border-color:var(--t2);color:var(--td)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;display:inline-flex;gap:6px;align-items:center;min-height:38px}
+.btn.main{background:var(--tl);border-color:var(--t2);color:var(--td)}
+.btn:focus-visible,.pills button:focus-visible,select:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.menu{position:relative}.menu .dd{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(16,24,40,.12);padding:6px;min-width:250px;display:none;z-index:30}
+.menu.open .dd{display:block}.dd button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer}.dd button:hover{background:var(--trk)}
+nav{max-width:1360px;margin:auto;padding:0 24px;display:flex;gap:22px;overflow-x:auto}
+nav button{border:0;background:none;padding:10px 0 9px;font-weight:700;color:var(--mut);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--ink);border-image:linear-gradient(90deg,var(--t1),var(--t2)) 1}
+main{max-width:1360px;margin:auto;padding:18px 24px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-size:19px;margin:22px 0 10px;font-weight:800}h3{font-size:16px;margin:0 0 8px;font-weight:800}
+.sub{color:var(--mut);font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-left:4px solid var(--c,var(--t1));border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left}
+.kpi .l{font-size:12.5px;color:var(--mut);font-weight:700}.kpi .v{font-size:23px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:lining-nums tabular-nums}.kpi .n{font-size:12px;color:var(--fnt)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700;border:1px solid var(--line);background:#fff;white-space:nowrap}
+.chip.sb{color:#fff;background:var(--sb);border-color:var(--sb)}.chip.nb{color:#fff;background:var(--nb);border-color:var(--nb)}
+.st-good{color:#1a8a4c;background:#eaf8f0;border-color:#bfe8d0}.st-watch{color:#9a6400;background:#fff7e4;border-color:#f3dfae}.st-high{color:#b8352b;background:#fff0ee;border-color:#f3c7c1}.st-vh{color:#86211b;background:#fbe7e5;border-color:#ebbab4}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,610px),1fr));gap:12px}
+.ag{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.aghd{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}
+.aghd select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fff;max-width:100%;font-size:13px}
+.tb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.tb h4{margin:0 0 4px;font-size:12.5px;color:var(--mut);text-transform:none}
+.rk{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:6px;align-items:center;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1.3;background:linear-gradient(90deg,color-mix(in srgb,var(--c,var(--t1)) 16%,#fff) var(--w,0%),transparent var(--w,0%))}
+.rk+.rk{margin-top:2px}.rk:hover{outline:1px solid color-mix(in srgb,var(--c,var(--t1)) 40%,#fff)}.rk .i{color:var(--fnt);font-size:11.5px;text-align:right}
+.rk .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rk[data-lv=substation] .nm{font-size:.92em}.rk[data-lv=substation] .g{display:none}.rk .g{font-weight:400;color:var(--fnt);font-size:11.5px}.rk .v{font-weight:800;text-align:right;white-space:nowrap}
+.bar{height:5px;background:var(--trk);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--t1),var(--t2));border-radius:9px}
+.rbox{border:1px solid var(--line);border-radius:9px;padding:6px 6px 7px;min-width:0}.rbox+.rbox{margin-top:0}.mini .rbox+.rbox{margin-top:8px}
+.rbox h4{margin:0 0 4px 4px;font-size:12px;font-weight:700}.rbox.top h4{color:#1a8a4c}.rbox.bot h4{color:#b8352b}
+.ag{border:1.5px solid color-mix(in srgb,var(--c,var(--t1)) 38%,#fff)!important}
+.ag .aghd{background:color-mix(in srgb,var(--c,var(--t1)) 8%,#fff);margin:-14px -14px 10px;padding:10px 14px;border-radius:11px 11px 0 0;border-bottom:1px solid color-mix(in srgb,var(--c,var(--t1)) 22%,#fff)}
+.lvl{margin:6px 0 12px;flex-wrap:wrap;border-radius:14px;width:fit-content;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13.5px}th{font-size:12px;color:var(--mut);font-weight:700;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}td{padding:6px 8px;border-bottom:1px solid var(--trk);text-align:right;font-variant-numeric:lining-nums tabular-nums}
+td .g{display:block;color:var(--fnt);font-size:11.5px}
+.scroll{overflow-x:auto}
+.nav2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;position:sticky;top:104px;z-index:10}
+.nav2 select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#fff;font-size:16px;min-height:40px;flex:1 1 260px}
+.crumb{color:var(--mut);font-size:13px}.crumb b{color:var(--ink)}
+.dhd{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:16px 0 10px}
+.dhd h1{font-size:clamp(24px,3vw,32px);margin:0;letter-spacing:-.01em}
+.sec{margin-top:14px}
+.agbox{background:#fff;border:1.5px solid color-mix(in srgb,var(--c) 38%,#fff);border-radius:12px;padding:0 16px 16px;margin-top:18px;overflow:hidden}
+.agbox>.sechd{background:color-mix(in srgb,var(--c) 9%,#fff);border-bottom:1px solid color-mix(in srgb,var(--c) 25%,#fff);margin:0 -16px 12px;padding:10px 16px}
+.agbox>.sechd h3{color:color-mix(in srgb,var(--c) 70%,#1d2433)}
+.kfs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0 0 12px}
+.kf{border:1px solid color-mix(in srgb,var(--c) 22%,#fff);border-radius:9px;padding:7px 10px;display:flex;flex-direction:column;gap:2px}
+.kf span{font-size:12px;color:var(--mut);line-height:1.25}.kf b{font-size:18px;font-weight:800;font-variant-numeric:lining-nums tabular-nums}.kf b.bad,.item .bad{color:#b8352b}
+.its{margin-top:10px}.sechd{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.five{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px;margin-top:10px}
+.mini{border:1px solid var(--line);border-radius:10px;padding:10px}
+.item{border-left:3px solid var(--t2);background:#fff;border-radius:8px;padding:8px 10px;margin:8px 0;border:1px solid var(--line);border-left-width:3px}
+.item b{font-weight:800}.item .w{color:var(--mut);font-size:12.5px}
+.offs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.off{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}.off b{display:block}
+.state{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:12px}
+.center{display:grid;place-items:center;min-height:50vh;text-align:center}.spin{width:34px;height:34px;border:3px solid var(--trk);border-top-color:var(--t1);border-radius:50%;animation:sp 1s linear infinite;margin:auto}
+@keyframes sp{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:0 8px 28px rgba(16,24,40,.14);display:none;z-index:40;max-width:92vw}
+.hide{display:none!important}
+.news{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:10px;align-items:start}.news.sm{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.clip{border:1px solid var(--line);border-radius:9px;background:#fff;padding:6px;cursor:zoom-in;text-align:left;font:inherit;display:flex;flex-direction:column;gap:4px}
+.clip img{width:100%;height:auto;max-height:340px;object-fit:contain;object-position:top;border-radius:5px;background:#fafafa}.news.sm .clip img{max-height:170px}
+.clip span{font-size:12px;color:var(--mut)}.clip .hl{font-size:13.5px;line-height:1.35;font-family:'Noto Sans Devanagari',Nunito,sans-serif}.news.sm .clip .hl{font-size:12.5px}.clip:hover{border-color:var(--t2)}
+.lb{position:fixed;inset:0;z-index:80;background:rgba(20,24,33,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}
+.lb img{max-width:min(96vw,1100px);max-height:84vh;background:#fff;border-radius:8px}.lb .sub{color:#e7eaf0}.lb #lbx{position:absolute;top:12px;right:12px}
+.pres{position:fixed;inset:0;z-index:60;background:var(--bg,#f4f6fa);display:flex;flex-direction:column}
+.pbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px max(2vw,14px);background:#fff;border-bottom:1px solid var(--line)}
+.pbar .grow{flex:1}.pcount{font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
+.seg{display:flex;background:#eef0f5;border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}.seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;min-height:34px}
+.seg button.on{background:var(--tl);color:var(--td);box-shadow:inset 0 0 0 1px var(--t2)}
+.pauto{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mut)}.pauto select{border:1px solid var(--line);border-radius:7px;padding:3px 4px;font-size:14px}
+.pbody{flex:1;min-height:0;overflow:auto;padding:14px max(2vw,14px) 24px}.pbody>.slide{max-width:1700px;margin:0 auto;animation:pf .25s ease}
+@keyframes pf{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.pbody>.slide{animation:none}}
+.pnav{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px max(2vw,14px);background:#fff;border-top:1px solid var(--line)}
+.pdots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;flex:1;min-width:0;overflow:hidden;max-height:22px}.pdots i{width:8px;height:8px;border-radius:9px;background:#d5d9e2;cursor:pointer}.pdots i.on{background:var(--t1);width:20px}
+.shd{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.shd h1{margin:0;font-size:clamp(26px,3vw,40px);line-height:1.1}.shd .sub{font-size:15px}
+.slide .ag{padding:16px}.slide .ag .aghd{margin:-16px -16px 12px;padding:12px 16px}.slide .rk{font-size:15px;padding:5px 8px}.slide .rk .g{font-size:12.5px}.slide .ag h3{font-size:20px}
+.ptile{max-width:420px;margin-bottom:12px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:10px;align-items:start}
+.pres.fit .pbody>.slide{max-width:none}
+.pres.fit .pgrid{display:block;columns:5 360px;column-gap:10px}.pres.fit .pgrid>.agbox{break-inside:avoid;display:inline-block;width:100%;margin:0 0 10px}
+.pgrid .agbox{margin-top:0}
+.pbox .pi{border-top:1px solid var(--trk);padding:5px 0}.pbox .pi:first-of-type{border-top:0}.pbox .pt{display:block;font-size:11px;font-weight:700;color:#8a6d3b;text-transform:none}
+.pbox .item{border:0;padding:0;margin:0;background:none;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.pbox .item .w{font-size:12px}
+.ptb{margin-top:10px}.ptb .mini{border:0;padding:0}.ptb .mini>h4{font-size:13px;color:var(--mut);margin:0 0 6px}
+.ptb .mini{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.ptb .mini>h4{grid-column:1/-1}.ptb .mini .rbox+.rbox{margin-top:0}
+@media(max-width:600px){.ptb .mini{grid-template-columns:1fr}}.pgrid .agbox .kfs{margin-bottom:0}
+.slide .tiles{margin-bottom:12px}
+input.srch{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:16px;min-height:40px;flex:1 1 240px}
+@media(max-width:760px){.hin,nav,main{padding-left:16px;padding-right:16px}.tb{grid-template-columns:1fr}.btn .w{display:none}.nav2{top:150px}}
+@media(max-width:600px){table.stack thead{display:none}table.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}table.stack td{display:flow-root;border:0;padding:2px 0;padding-inline-start:9.5em;text-align:start}
+table.stack td::before{content:attr(data-l);float:inline-start;width:9em;margin-inline-start:-9.5em;color:var(--mut);font-size:12px}table.stack td:empty{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hin">
+    <div class="badge" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="none" stroke="var(--td)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+    <div class="ttl"><b>All-Agenda Review</b><span id="asof">Loading the figures …</span></div>
+    <button class="btn main" id="presb" title="Present full screen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="w">Present</span></button>
+    <div class="menu" id="pdfm"><button class="btn" id="pdfb" aria-haspopup="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg><span class="w">PDF</span></button>
+      <div class="dd" id="pdfdd"></div></div>
+    <button class="btn" id="refresh" title="Refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span class="w">Refresh</span></button>
+    <div class="pills" id="scope" role="group" aria-label="Scope"><button data-s="Bihar" class="on">Bihar</button><button data-s="SBPDCL">SBPDCL</button><button data-s="NBPDCL">NBPDCL</button></div>
+  </div>
+  <nav id="tabs"><button data-t="overview" class="on">Overview</button><button data-t="district">District review</button><button data-t="officers">Officers</button></nav>
+</header>
+<main id="main"><div class="center"><div><div class="spin"></div><p>Loading the figures …</p></div></div></main>
+<div class="toast" id="toast"></div>
+<div class="lb hide" id="lb" role="dialog" aria-label="News clipping"><button class="btn" id="lbx">✕ Close</button><img id="lbimg" alt=""><div class="sub" id="lbcap"></div></div>
+<div class="pres hide" id="pres" role="dialog" aria-label="Presentation">
+  <div class="pbar">
+    <div class="seg" id="pmode"><button data-pm="agenda">Agendas</button><button data-pm="district">Districts</button></div>
+    <div class="seg" id="plvl"></div>
+    <span class="pcount" id="pcount"></span>
+    <span class="grow"></span>
+    <button class="btn" id="pprev" title="Previous (←)">‹<span class="w"> Previous</span></button><button class="btn main" id="pnext" title="Next (→)"><span class="w">Next </span>›</button>
+    <label class="pauto"><input type="checkbox" id="pfit"> Fit to screen</label>
+    <label class="pauto"><input type="checkbox" id="pauto"> Move on every <select id="psec"><option>15</option><option selected>30</option><option>60</option></select> s</label>
+    <button class="btn" id="pclose" title="Close (Esc)">✕<span class="w"> Close</span></button>
+  </div>
+  <div class="pbody" id="pbody"></div>
+</div>
+<script>
+{
+const NF = new Intl.NumberFormat('en-IN', {maximumFractionDigits: 0});
+const NF1 = new Intl.NumberFormat('en-IN', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const SC = {Bihar: ['#E8894A', '#F5B98C', '#FDEDE0', '#8A4513'], NBPDCL: ['#5FAF7E', '#A8D8B9', '#E8F6EE', '#1F6B43'], SBPDCL: ['#9A80D2', '#C9B9EC', '#F2EDFB', '#4F3A8C']};
+const LV = {circle: 'Circle', district: 'District', division: 'Division', subdivision: 'Sub-division', section: 'Section', substation: 'Substation'};
+const ORDER = ['outage', 'pmsg', 'ula', 'c1912', 'revenue', 'nsc', 'utility', 'pss', 'electro', 'offgrid', 'dmfb'];
+const COL = {pmsg: '#2f6db5', ula: '#0f9f8f', c1912: '#c0392b', outage: '#C9A227', revenue: '#2e8b57', nsc: '#7a65c2', utility: '#b86b2a', pss: '#3d7fb8', electro: '#a13b5b', offgrid: '#5a8f29', dmfb: '#6b6f80', dpi: '#8a6d3b'};
+const MINN = {c1912: 30, revenue: 1, nsc: 50};
+const AGG = {   // recompute each KPI from summed base figures, the same way the build does
+  pmsg: b => ({pt: b.tgt ? 100 * b.inst / b.tgt : null, pa: b.app ? 100 * b.inst / b.app : null}),
+  ula: b => ({pt: b.tgt ? 100 * b.inv / b.tgt : null, pp: b.inv ? 100 * b.upd / b.inv : null}),
+  c1912: b => ({sla: b.rec ? b.slaw / b.rec : null}),
+  outage: b => ({aof: b.tf ? b.om / b.tf : null, aif: b.tf ? b.it / b.tf : null, fo: b.tf ? 100 * b.fwo / b.tf : null}),
+  revenue: b => ({ce: b.ass ? 100 * b.coll / b.ass : null, pp: b.act ? 100 * b.pay / b.act : null}),
+  nsc: b => ({w15: (b.c15 + b.cb) ? 100 * b.c15 / (b.c15 + b.cb) : null}),
+  pss: b => ({lw: b.n ? b.lwsum / b.n : null}),
+  offgrid: b => ({dp: b.hh ? 100 * b.done / b.hh : null}),
+  utility: b => ({}), electro: b => ({}), dmfb: b => ({}), dpi: b => ({})
+};
+let R = null, scope = 'Bihar', tab = 'overview', level = 'circle', curDist = null, divTot = {}, distOrder = [], sel = {};
+const $ = id => document.getElementById(id);
+const toast = (html, ms = 6000) => { const t = $('toast'); t.innerHTML = html; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms); };
+
+function hm(min) { if (min == null || isNaN(min)) return ''; const m = Math.floor(min); return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+function fmt(v, f) {
+  if (v == null || isNaN(v)) return '';
+  if (f === 'pct') return NF1.format(v) + '%';
+  if (f === 'dec0') return hm(v);
+  if (f === 'dec1') return NF1.format(v);
+  return NF.format(Math.round(v));
+}
+function ostat(min) { if (min == null) return ''; return min <= 30 ? ['Good', 'st-good'] : min <= 60 ? ['Watch', 'st-watch'] : min <= 120 ? ['High', 'st-high'] : ['Very high', 'st-vh']; }
+function ssShort(n) {
+  return titled(String(n).replace(/^\s*(\d+\s*\/\s*\d+\s*(k\.?v\.?)?|\d+\s*k\.?v\.?)\s*/i, '').replace(/^\s*(pss|gss|ess|sub\s*-?\s*station)\s*[-:,]?\s*/i, '').replace(/\s*\b(pss|gss|sub\s*-?\s*station|s\/s)\b\.?\s*$/i, '').replace(/\s+/g, ' ').trim()) || n;
+}
+function unitName(lv, id) {
+  const H = R.H;
+  if (lv === 'circle') return (H.circles[id] || {}).n || id;
+  if (lv === 'district') return (H.districts[id] || {}).n || id;
+  if (lv === 'division') return titled((H.divisions[id] || {}).n || id);
+  if (lv === 'subdivision') return titled((H.subdivs[id] || {}).n || id);
+  if (lv === 'section') return titled((H.sections[id] || {}).n || id);
+  if (lv === 'substation') return ssShort((R.SS[id] || {}).n || id);
+  return id;
+}
+function titled(s) { return String(s).toLowerCase().replace(/(^|[\s(\-/])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Pesu|Pss|Gss|Gis|Rdss|Ncc|Bsphcl|Iti|Aiims|Rps|Ttc|Cusb)\b/g, x => x.toUpperCase()).replace(/\b(Ii|Iii|Iv|Vi)\b/g, x => x.toUpperCase()); }
+function discomOf(lv, id) {
+  const H = R.H;
+  if (lv === 'circle') return (H.circles[id] || {}).d;
+  if (lv === 'district') return (H.districts[id] || {}).d;
+  if (lv === 'division') return (H.divisions[id] || {}).d;
+  if (lv === 'subdivision') return (H.subdivs[id] || {}).d;
+  if (lv === 'section') return (H.sections[id] || {}).d;
+  if (lv === 'substation') return id.indexOf('-SB-') > 0 ? 'SBPDCL' : 'NBPDCL';
+}
+function officer(id, post) { const o = (R.OFF[id] || []).find(x => !post || x.p === post); return o ? o.p + ' ' + o.n : ''; }
+function parentLine(lv, id) {
+  const H = R.H;
+  if (lv === 'circle') { const z = R.H.zones[(H.circles[id] || {}).z]; return [z ? titled(z[1]) : '', officer(id, 'ESE')].filter(Boolean).join(' · '); }
+  if (lv === 'district') { const c = (H.districts[id] || {}).pc; return c ? H.circles[c].n + ' circle' : ''; }
+  if (lv === 'division') { const c = (H.divisions[id] || {}).c; return [c ? H.circles[c].n : '', officer(id, 'EEE')].filter(Boolean).join(' · '); }
+  if (lv === 'subdivision') { const v = (H.subdivs[id] || {}).v; return [v ? titled(H.divisions[v]?.n || '') : '', officer(id, 'AEE')].filter(Boolean).join(' · '); }
+  if (lv === 'section') { const x = H.sections[id] || {}; return [x.s ? titled(H.subdivs[x.s]?.n || '') : (x.v ? titled(H.divisions[x.v]?.n || '') : ''), officer(id, 'JEE')].filter(Boolean).join(' · '); }
+  if (lv === 'substation') { const v = (R.SS[id] || {}).v; return v ? titled(H.divisions[v]?.n || '') : ''; }
+  return '';
+}
+function distOf(lv, id) {
+  const H = R.H;
+  if (lv === 'district') return id;
+  if (lv === 'division') return H.divisions[id]?.t;
+  if (lv === 'subdivision') return H.subdivs[id]?.t;
+  if (lv === 'section') return H.sections[id]?.t;
+  if (lv === 'substation') return R.SS[id]?.t;
+  if (lv === 'circle') return distOrder.find(d => R.H.districts[d].pc === id);
+}
+function known(lv, id) { const H = R.H, src = {circle: H.circles, district: H.districts, division: H.divisions, subdivision: H.subdivs, section: H.sections, substation: R.SS}[lv]; return !!(src && src[id]); }
+function inScope(lv, id) { return scope === 'Bihar' || discomOf(lv, id) === scope; }
+function kpisAt(ak, lv) { return R.AG[ak].kpis.filter(k => k.f && (!k.lv || k.lv.includes(lv))); }
+function tabKpis(ak, lv) {
+  const all = kpisAt(ak, lv), key = R.AG[ak].key || [];
+  if (!key.length) return all;
+  const pick = [...new Set([...all.filter(k => k.primary).map(k => k.k), ...key])].map(k => all.find(x => x.k === k)).filter(Boolean);
+  return pick.slice(0, 8);
+}
+function keyStrip(ak, b) {
+  const A = R.AG[ak]; if (!b || !(A.key || []).length) return '';
+  const cells = A.key.map(k => A.kpis.find(x => x.k === k)).filter(k => k && b[k.k] != null && !isNaN(b[k.k]))
+    .map(k => `<div class="kf"><span>${esc(k.l)}</span><b class="${k.b === 'low' && b[k.k] > 0 ? 'bad' : ''}">${fmt(b[k.k], k.f)}</b></div>`);
+  return cells.length ? `<div class="kfs">${cells.join('')}</div>` : '';
+}
+function sumUnits(ak, lv, ids) {
+  const L = R.AG[ak].L[lv] || {}, b = {};
+  let any = false;
+  for (const id of ids) { const u = L[id]; if (!u) continue; any = true; for (const [k, v] of Object.entries(u)) if (typeof v === 'number' && !(k in AGG[ak]({})) && k !== '_n') b[k] = (b[k] || 0) + v; }
+  if (!any) return null;
+  return Object.assign(b, AGG[ak](new Proxy(b, {get: (o, k) => o[k] || 0})));
+}
+const TOT = {dpi: 'district', pmsg: 'district', ula: 'district', offgrid: 'district', dmfb: 'district', pss: 'district'};
+function scopeTotal(ak) {
+  const L = R.AG[ak].L, lv = TOT[ak] || (L.circle ? 'circle' : 'district');
+  return sumUnits(ak, lv, Object.keys(L[lv] || {}).filter(id => inScope(lv, id)));
+}
+function ranked(ak, lv, k, ids) {
+  const L = R.AG[ak].L[lv] || {}, kp = R.AG[ak].kpis.find(x => x.k === k);
+  let arr = (ids || Object.keys(L)).filter(id => L[id] && known(lv, id) && inScope(lv, id) && L[id][k] != null && !((ak === 'outage' && (k === 'aof' ? Math.floor(L[id][k]) === 0 : Math.round(L[id][k] * 10) === 0)) || (ak === 'c1912' && kp && kp.f === 'int' && L[id][k] === 0)) && (!MINN[ak] || L[id]._n == null || L[id]._n >= MINN[ak]));
+  if (kp.b === 'low') arr.sort((a, b) => L[a][k] - L[b][k]); else arr.sort((a, b) => L[b][k] - L[a][k]);
+  return arr.map(id => ({id, v: L[id][k]}));
+}
+
+/* ---------------------------------------------------------- overview */
+function headTiles() {
+  const out = [];
+  const add = (ak, k, noteF) => {
+    const t = scopeTotal(ak); if (!t) return;
+    const kq = R.AG[ak].kpis.find(x => x.k === k); if (!kq || t[k] == null || isNaN(t[k])) return;
+    const note = noteF(t);
+    const kp = R.AG[ak].kpis.find(x => x.k === k);
+    let v = fmt(t[k], kp.f); if (ak === 'outage') v = hm(t[k]) + ' <span style="font-size:12px;color:var(--mut)">hr:min</span>';
+    if (/₹ lakh/.test(kp.l)) v = '₹' + NF.format(Math.round(t[k])) + ' <span style="font-size:12px;color:var(--mut)">lakh</span>';
+    out.push(`<button class="kpi" style="--c:${COL[ak]}" data-ag="${ak}"><div class="l">${esc(R.AG[ak].t)}</div><div class="v">${v}</div><div class="n">${esc(kp.l)}${note ? ' · ' + esc(note) : ''}</div></button>`);
+  };
+  add('outage', 'aof', t => NF.format(t.o4) + ' feeders out over 4 hrs');
+  add('pmsg', 'inst', t => [t.app != null && NF.format(t.app) + ' applications', t.a7 != null && NF.format(t.a7) + ' applied in last 7 days', t.l7 != null && NF.format(t.l7) + ' in last 7 days', t.pend != null && NF.format(t.pend) + ' installation pending', t.pt != null && NF1.format(t.pt) + '% of target'].filter(Boolean).join(' · '));
+  add('ula', 'inv', t => [t.upd != null && NF.format(t.upd) + ' on portal', t.ca != null && NF.format(t.ca) + ' consumer accepted', t.pi != null && NF.format(t.pi) + ' inspection pending'].filter(Boolean).join(' · '));
+  add('c1912', 'y', t => [t.ys != null && NF.format(t.ys) + ' supply', t.yb != null && NF.format(t.yb) + ' billing', t.sp != null && NF.format(t.sp) + ' supply pending', t.bp != null && NF.format(t.bp) + ' billing pending'].filter(Boolean).join(' · '));
+  add('revenue', 'coll', t => [t.ass != null && '₹' + NF.format(Math.round(t.ass)) + ' lakh assessed', t.pay != null && NF.format(t.pay) + ' paying consumers'].filter(Boolean).join(' · '));
+  add('nsc', 'pen', t => (t.amisp != null ? NF.format(t.amisp) + ' at AMISP · ' : '') + (t.w15 != null ? NF1.format(t.w15) + '% done within 15 days' : ''));
+  if (scope !== 'NBPDCL') {
+    add('utility', 'np', t => 'of ' + NF.format(t.tot) + ' works');
+    add('pss', 'lw', t => NF.format(t.n) + ' RDSS PSS' + (t.li ? ' · ' + NF.format(t.li) + ' with land issues' : ''));
+    add('electro', 'sp', t => 'of ' + NF.format(t.cp) + ' cases');
+  }
+  add('offgrid', 'dp', t => NF.format(t.hh) + ' households to connect' + (t.noc ? ' · ' + NF.format(t.noc) + ' NOCs and clearances pending' : ''));
+  add('dmfb', 'open', t => 'from District Magistrates');
+  if (R.NEWS) { const ds = Object.keys(R.NEWS.by).filter(id => inScope('district', id)); const n = ds.reduce((a, d) => a + R.NEWS.by[d].length, 0); if (n) out.push(`<button class="kpi" style="--c:#3b6e8f" data-jumpnews="1"><div class="l">BSPHCL Daily News Briefing</div><div class="v">${NF.format(n)}</div><div class="n">News clippings, ${esc(R.NEWS.date)} · ${NF.format(ds.length)} districts</div></button>`); }
+  add('dpi', 'n', t => 'across ' + NF.format(Object.keys(R.AG.dpi.L.district || {}).filter(id => inScope('district', id)).length) + ' districts');
+  return out.join('');
+}
+function rankRows(ak, lv, k, list, maxv) {
+  const kp = R.AG[ak].kpis.find(x => x.k === k);
+  return list.map((r, i) => {
+    const w = maxv ? Math.max(3, 100 * Math.abs(r.v) / maxv) : 0;
+    const val = ak === 'outage' && k === 'aof' ? hm(r.v) : fmt(r.v, kp.f);
+    const pl = parentLine(lv, r.id);
+    return `<div class="rk" data-lv="${lv}" data-id="${esc(r.id)}" style="--w:${w.toFixed(1)}%" title="${esc(unitName(lv, r.id) + (pl ? ' · ' + pl : ''))}"><span class="i">${r.rank || i + 1}</span><span class="nm">${esc(unitName(lv, r.id))}${pl ? `<span class="g"> · ${esc(pl)}</span>` : ''}</span><span class="v num">${val}</span></div>`;
+  }).join('');
+}
+function agCard(ak, lv, n) {
+  const ks = kpisAt(ak, lv); if (!ks.length || !R.AG[ak].L[lv]) return '';
+  const key_ = ak + '|' + lv; let k = sel[key_] || (ks.find(x => x.primary) || ks[0]).k;
+  if (!ks.find(x => x.k === k)) k = ks[0].k;
+  const r = ranked(ak, lv, k); if (!r.length) return '';
+  r.forEach((x, i) => x.rank = i + 1);
+  const maxv = Math.max(...r.map(x => Math.abs(x.v)));
+  const kp = ks.find(x => x.k === k);
+  const top = r.slice(0, n), bot = r.slice(Math.max(n, r.length - n)).reverse();
+  const word = kp.b === 'low' ? ['Best (lowest)', 'Worst (highest)'] : kp.b === 'high' ? ['Best (highest)', 'Worst (lowest)'] : ['Highest', 'Lowest'];
+  return `<div class="ag" style="--c:${COL[ak]}"><div class="aghd"><div><h3>${esc(R.AG[ak].t)}</h3><div class="sub">${esc(LV[lv])} · ${r.length} ranked · as on ${esc(R.AG[ak].asof)}</div></div>
+   <select data-sel="${key_}" aria-label="Measure">${ks.map(x => `<option value="${x.k}"${x.k === k ? ' selected' : ''}>${esc(x.l)}</option>`).join('')}</select></div>
+   <div class="tb">${top.length ? `<div class="rbox top"><h4>Top ${top.length} · ${word[0]}</h4>${rankRows(ak, lv, k, top, maxv)}</div>` : ''}
+   ${bot.length ? `<div class="rbox bot"><h4>Bottom ${bot.length} · ${word[1]}</h4>${rankRows(ak, lv, k, bot, maxv)}</div>` : ''}</div>
+   ${R.AG[ak].note ? `<div class="sub" style="margin-top:6px">${esc(R.AG[ak].note)}</div>` : ''}</div>`;
+}
+function stateCard() {
+  const S = R.STATE, nf = S.nfms.v, rd = S.rdss.v;
+  const r1 = Object.entries(nf).map(([lab, x]) => `<tr><td>${esc(lab.replace(', hours', ''))}</td>${['Bihar', 'SBPDCL', 'NBPDCL'].map(n => `<td>${x[n] ? hm(x[n].v * 60) + ' <span class="g">rank ' + x[n].rank + ' of ' + x[n].of + '</span>' : ''}</td>`).join('')}<td>${x.India != null ? hm(x.India * 60) : ''}</td></tr>`).join('');
+  const r2 = Object.entries(rd).filter(([k]) => k[0] !== '_').map(([lab, x]) => {
+    const g = n => { const d = (x.discoms || []).find(z => z.name === n); return d && d.pct != null ? NF1.format(d.pct) + '%' : ''; };
+    return `<tr><td>${esc(lab)}<span class="g">${esc(x.done)}</span></td><td>${g('SBPDCL')}</td><td>${g('NBPDCL')}</td><td>${x.india && x.india.pct != null ? NF1.format(x.india.pct) + '%' : ''}</td></tr>`;
+  }).join('');
+  const at = rd._atc, yi = at ? at.years.length - 1 : -1;
+  const atRow = at ? `<tr><td>AT&amp;C loss, ${esc(at.years[yi])}<span class="g">lower is better</span></td>${['SBPDCL', 'NBPDCL'].map(n => { const d = at.discoms.find(z => z.name === n); return '<td>' + (d ? NF1.format(d.values[yi]) + '%' : '') + '</td>'; }).join('')}<td>${at.india[yi] != null ? NF1.format(at.india[yi]) + '%' : ''}</td></tr>` : '';
+  return `<div class="state"><div class="card"><h3>Hours of supply against other states (NFMS)</h3><div class="sub">Average supply, hr:min, as on ${esc(S.nfms.asof)}. Rank 1 = most hours.</div>
+   <div class="scroll"><table><thead><tr><th>Measure</th><th>Bihar</th><th>SBPDCL</th><th>NBPDCL</th><th>India</th></tr></thead><tbody>${r1}</tbody></table></div></div>
+   <div class="card"><h3>RDSS progress (share done)</h3><div class="sub">As on ${esc(S.rdss.asof)}</div>
+   <div class="scroll"><table><thead><tr><th>Work</th><th>SBPDCL</th><th>NBPDCL</th><th>India</th></tr></thead><tbody>${r2}${atRow}</tbody></table></div></div></div>`;
+}
+function drawOverview() {
+  const lvs = Object.keys(LV).filter(lv => ORDER.some(ak => R.AG[ak].L[lv] && kpisAt(ak, lv).length));
+  if (!lvs.includes(level)) level = 'circle';
+  $('main').innerHTML = `<h2 style="margin-top:4px">Where ${scope === 'Bihar' ? 'Bihar' : scope} stands today</h2><div class="tiles">${headTiles()}</div>
+   <h2>Top 10 and bottom 10, every agenda</h2>
+   <div class="pills lvl" id="lvls">${lvs.map(lv => `<button data-lv="${lv}" class="${lv === level ? 'on' : ''}">${LV[lv]}</button>`).join('')}</div>
+   <div class="grid2">${ORDER.map(ak => agCard(ak, level, 10)).join('') || '<div class="card">No figures at this level yet.</div>'}</div>
+   <h2>Bihar against other states</h2>${stateCard()}`;
+}
+
+/* ---------------------------------------------------------- district review */
+function districtList() {
+  const H = R.H, circles = Object.keys(H.circles).filter(c => scope === 'Bihar' || H.circles[c].d === scope);
+  circles.sort((a, b) => (H.circles[a].d + H.circles[a].n).localeCompare(H.circles[b].d + H.circles[b].n));
+  const groups = circles.map(c => ({c, ds: Object.keys(H.districts).filter(d => H.districts[d].pc === c).sort((a, b) => H.districts[a].n.localeCompare(H.districts[b].n))})).filter(g => g.ds.length);
+  return groups;
+}
+function divsOf(dt) {
+  const v = R.H.districts[dt].v || [];
+  return v.filter(([dv, n]) => R.H.divisions[dv] && (R.H.divisions[dv].t === dt || n / (divTot[dv] || 1) >= 0.2)).map(([dv]) => dv);
+}
+function unitsOf(lv, dt) {
+  const src = lv === 'subdivision' ? R.H.subdivs : R.H.sections;
+  return Object.keys(src).filter(id => src[id].t === dt);
+}
+function newsOf(dt) { return (R.NEWS && R.NEWS.by && R.NEWS.by[dt]) || []; }
+function newsHtml(dt, cls = '') {
+  const N = newsOf(dt); if (!N.length) return '';
+  return `<div class="news ${cls}">${N.map((c, i) => `<button class="clip" data-clip="${esc(dt)}|${i}" title="Open the clipping"><img src="${esc(c.f)}" alt="News clipping, ${esc(c.place)}, page ${c.p}" loading="lazy" width="${c.w}" height="${c.h}">${c.hl ? `<b class="hl">${esc(c.hl)}</b>` : ''}<span>${esc(c.place)} · page ${c.p}</span></button>`).join('')}</div>`;
+}
+function itemHtml(it) {
+  const dv = it.v ? titled(R.H.divisions[it.v]?.n || '') : '';
+  switch (it.k) {
+    case 'dmfb': return `<div class="item"><b>${esc(it.cat)} – ${esc(it.it)}</b>${it.bv ? ' · ' + esc(it.bv) : ''}${it.n ? ' · ' + esc(it.n) + ' cases' : ''}<div>${esc(it.det)}</div><div class="w">DM feedback ${esc(it.ref)}, ${esc(it.on)}</div></div>`;
+    case 'util': return `<div class="item"><b>${esc(dv)}</b> · ${esc(it.ag)} · pending with <b>${esc(it.at || 'not stated')}</b><div>${esc(it.p)}</div><div class="w">${esc(it.rem)}</div></div>`;
+    case 'electro': return `<div class="item"><b>${esc(dv)}</b> · ${NF.format(it.n)} electrocution case${it.n > 1 ? 's' : ''} pending · ${esc(it.why)}<div class="w">${esc(it.rem)}</div></div>`;
+    case 'rdss': return `<div class="item"><b>${esc(it.nm)}</b> (${esc(dv)}) · line work ${it.lw}%${it.land ? ' · <b class="bad">Land: ' + esc(it.land) + '</b>' : ''}<div class="w">${esc(it.tkc)}${it.exp ? ' · expected ' + esc(it.exp) : ''}</div></div>`;
+    case 'state': return `<div class="item"><b>${esc(it.nm)}</b> (State Plan PSS) · ${esc(it.ag)}${it.fp != null ? ' · financial ' + it.fp + '%' : ''}${it.tc ? ' · target ' + esc(it.tc) : ''}${it.land ? ' · <b class="bad">Land: ' + esc(it.land) + '</b>' : ''}${it.rem ? '<div class="w">' + esc(it.rem) + '</div>' : ''}</div>`;
+    case 'dpi': return `<div class="item"><b>${esc(it.t)}</b>${it.pw ? ' · pending with <b>' + esc(it.pw) + '</b>' : ''}<div>${esc(it.s)}</div><div class="w">${esc([it.pr, it.ro, it.on ? 'as on ' + it.on : '', it.dl].filter(Boolean).join(' · '))}</div></div>`;
+    case 'noc': return `<div class="item"><b>NOC / clearance pending</b> · ${esc(it.proj)}<div>${esc(it.txt)}</div></div>`;
+    case 'offgrid': return `<div class="item"><b>${esc(it.proj || 'Off-grid electrification')}</b> · ${NF.format(it.vill)} villages, ${NF.format(it.hh)} households${it.done ? ', ' + NF.format(it.done) + ' connected' : ''}<div>${esc(it.iss || it.st)}</div></div>`;
+    case 'o24': return `<div class="item"><b>${esc(it.f)}</b> feeder, ${esc(it.ss)} (${esc(dv)}) · out ${NF.format(it.h)} hrs · ${esc(it.ty)}</div>`;
+    case 'cmd': return `<div class="item"><b>${esc(it.tab)}</b><div>${esc(it.txt)}</div></div>`;
+    case 'repeat': return `<div class="item"><b>${esc(it.area)}</b> · ${esc(it.sub)} · ${NF.format(it.n)} complaints on ${NF.format(it.days)} days${it.pen ? ', ' + NF.format(it.pen) + ' pending' : ''}<div class="w">${esc(it.s ? titled(R.H.sections[it.s]?.n || '') : '')} ${esc(dv)}</div></div>`;
+    default: return '';
+  }
+}
+function unitTable(ak, lv, ids) {
+  const ks = tabKpis(ak, lv), L = R.AG[ak].L[lv] || {};
+  const rows = ids.filter(id => L[id]);
+  if (!rows.length || !ks.length) return '';
+  return `<div class="scroll"><table class="stack"><thead><tr><th>${LV[lv]}</th>${ks.map(k => `<th>${esc(k.l)}</th>`).join('')}</tr></thead><tbody>${rows.map(id =>
+    `<tr><td><b>${esc(unitName(lv, id))}</b><span class="g">${esc(parentLine(lv, id))}</span></td>${ks.map(k => `<td>${ak === 'outage' && k.k === 'aof' ? hm(L[id][k.k]) : fmt(L[id][k.k], k.f)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function fiveBox(ak, lv, ids) {
+  const ks = kpisAt(ak, lv); if (!ks.length) return '';
+  const k = (ks.find(x => x.primary) || ks[0]).k, r = ranked(ak, lv, k, ids);
+  if (r.length < 2) return '';
+  const maxv = Math.max(...r.map(x => Math.abs(x.v))), n = Math.min(5, Math.floor(r.length / 2));
+  return `<div class="mini"><h4 style="margin:0 0 6px">${LV[lv]}s · ${esc(ks.find(x => x.k === k).l)}</h4><div class="rbox top"><h4>Top ${n}</h4>${rankRows(ak, lv, k, r.slice(0, n), maxv)}</div>
+   <div class="rbox bot"><h4>Bottom ${n}</h4>${rankRows(ak, lv, k, r.slice(-n).reverse(), maxv)}</div></div>`;
+}
+function drawDistrict() {
+  const groups = districtList();
+  distOrder = groups.flatMap(g => g.ds);
+  if (!curDist || !distOrder.includes(curDist)) curDist = distOrder[0];
+  const H = R.H, dt = curDist, D = H.districts[dt], idx = distOrder.indexOf(dt);
+  const divs = divsOf(dt), subs = unitsOf('subdivision', dt), secs = unitsOf('section', dt);
+  const circles = D.c.filter(c => scope === 'Bihar' || H.circles[c].d === scope);
+  const opts = groups.map(g => `<optgroup label="${esc(H.circles[g.c].n)} circle (${esc(H.circles[g.c].d)})">${g.ds.map(d => `<option value="${d}"${d === dt ? ' selected' : ''}>${esc(H.districts[d].n)}</option>`).join('')}</optgroup>`).join('');
+  // headline tiles for the district
+  const tiles = [];
+  for (const ak of ORDER) {
+    const A = R.AG[ak]; let b = null;
+    if (A.L.district && A.L.district[dt]) b = A.L.district[dt];
+    else if (A.L.division) b = sumUnits(ak, 'division', divs);
+    if (!b) continue;
+    const ks = A.kpis.filter(k => k.f && (!k.lv || k.lv.includes('district')));
+    const k = ks.find(x => x.primary) || ks[0]; if (!k || b[k.k] == null) continue;
+    const v = ak === 'outage' ? hm(b[k.k]) + ' <span style="font-size:12px;color:var(--mut)">hr:min</span>' : /₹ lakh/.test(k.l) ? '₹' + NF.format(Math.round(b[k.k])) + ' <span style="font-size:12px;color:var(--mut)">lakh</span>' : fmt(b[k.k], k.f);
+    const st = ak === 'outage' ? ostat(b[k.k]) : null;
+    tiles.push(`<button class="kpi" style="--c:${COL[ak]}" data-jump="s-${ak}"><div class="l">${esc(A.t)}</div><div class="v">${v}</div><div class="n">${esc(k.l)}${st ? ' · <span class="chip ' + st[1] + '">' + st[0] + '</span>' : ''}</div></button>`);
+  }
+  const offs = [];
+  circles.forEach(c => (R.OFF[c] || []).forEach(o => offs.push([H.circles[c].n + ' circle', o])));
+  divs.forEach(v => (R.OFF[v] || []).forEach(o => offs.push([titled(H.divisions[v].n) + ' division', o])));
+  // agenda sections
+  const secHtml = ORDER.map(ak => {
+    const A = R.AG[ak];
+    const dB = A.L.district && A.L.district[dt] ? A.L.district[dt] : (A.L.division ? sumUnits(ak, 'division', divs) : null);
+    const kf = keyStrip(ak, dB);
+    const dTab = A.L.district && A.L.district[dt] && !kf ? unitTable(ak, 'district', [dt]) : '';
+    const vTab = unitTable(ak, 'division', divs);
+    const five = [fiveBox(ak, 'subdivision', subs), fiveBox(ak, 'section', secs)].join('');
+    const items = (A.items[dt] || []).filter(it => !['cmd', 'ula'].includes(it.k)).slice(0, 12).map(itemHtml).join('');
+    const ula = ak === 'ula' && A.items[dt] ? `<div class="scroll"><table class="stack"><thead><tr><th>Agency</th><th>Target</th><th>Structures</th><th>Panels</th><th>Inverters</th><th>Updated on portal</th><th>Consumer accepted</th><th>Pending for inspection</th></tr></thead><tbody>${A.items[dt].filter(x => x.k === 'ula').map(x => `<tr><td>${esc(x.ag)}</td><td>${fmt(x.tgt)}</td><td>${fmt(x.str)}</td><td>${fmt(x.pan)}</td><td>${fmt(x.inv)}</td><td>${fmt(x.upd)}</td><td>${fmt(x.ca)}</td><td>${fmt(x.pi)}</td></tr>`).join('')}</tbody></table></div>` : '';
+    if (!kf && !dTab && !vTab && !five && !items && !ula) return '';
+    return `<section class="sec agbox" id="s-${ak}" style="--c:${COL[ak]}"><div class="sechd"><h3>${esc(A.t)}</h3>${A.asof ? `<span class="sub">${/^(updated|read)/.test(A.asof) ? '' : 'as on '}${esc(A.asof)}</span>` : ''}</div>
+      ${kf}${dTab}${ula}${vTab}${five ? `<div class="five">${five}</div>` : ''}${items ? `<div class="its">${items}</div>` : ''}</section>`;
+  }).join('');
+  const cmd = (R.AG.cmd.items[dt] || []).map(itemHtml).join('');
+  const pend = (R.PEND[dt] || []).map(itemHtml).join('');
+  $('main').innerHTML = `<div class="nav2"><button class="btn" id="prev" ${idx <= 0 ? 'disabled' : ''}>‹ Previous</button><select id="dsel" aria-label="District">${opts}</select>
+    <button class="btn main" id="next" ${idx >= distOrder.length - 1 ? 'disabled' : ''}>Next ›</button><span class="crumb">${esc(scope)} › ${esc(H.circles[D.pc]?.n || '')} circle › <b>${esc(D.n)}</b> · ${idx + 1} of ${distOrder.length}</span></div>
+   <div class="dhd"><div><h1>${esc(D.n)}</h1><div class="row" style="margin-top:6px">${[...new Set(circles.map(c => H.circles[c].d))].map(d => `<span class="chip ${d === 'SBPDCL' ? 'sb' : 'nb'}">${d}</span>`).join('')}
+     <span class="sub">${circles.map(c => esc(H.circles[c].n)).join(', ')} circle · ${divs.length} division${divs.length > 1 ? 's' : ''} · ${subs.length} sub-divisions · ${secs.length} sections</span></div></div>
+     <button class="btn main" id="dpdf"><span>PDF of ${esc(D.n)}</span></button></div>
+   <div class="tiles">${tiles.join('')}</div>
+   ${offs.length ? `<h2>Officers to review with</h2><div class="offs">${offs.map(([u, o]) => `<div class="off"><span class="sub">${esc(u)}</span><b>${esc(o.p)} · ${esc(o.n)}</b>${o.m ? `<span class="num">${esc(o.m)}</span>` : ''}</div>`).join('')}</div>` : ''}
+   ${pend ? `<h2>Pending issues</h2><div class="card">${pend}</div>` : ''}
+   ${newsOf(dt).length ? `<h2>${esc(D.n)} in the news <span class="sub">${esc(R.NEWS.paper)}, ${esc(R.NEWS.date)}</span></h2><div class="card">${newsHtml(dt)}</div>` : ''}
+   <h2>Agenda by agenda, division to section</h2>${secHtml}
+   ${cmd ? `<h2>${esc(D.n)} in the CMD Cell agenda</h2><div class="card">${cmd}</div>` : ''}
+   <div class="row" style="justify-content:space-between;margin-top:18px"><button class="btn" id="prev2" ${idx <= 0 ? 'disabled' : ''}>‹ ${idx > 0 ? esc(H.districts[distOrder[idx - 1]].n) : 'Previous'}</button>
+   <button class="btn main" id="next2" ${idx >= distOrder.length - 1 ? 'disabled' : ''}>Next: ${idx < distOrder.length - 1 ? esc(H.districts[distOrder[idx + 1]].n) : ''} ›</button></div>`;
+  const go = d => { curDist = d; drawDistrict(); window.scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); };
+  $('dsel').onchange = e => go(e.target.value);
+  for (const [b, s] of [['prev', -1], ['prev2', -1], ['next', 1], ['next2', 1]]) { const el = $(b); if (el) el.onclick = () => { const n = distOrder[idx + s]; if (n) go(n); }; }
+  $('dpdf').onclick = () => pdfDistrict(dt);
+  try { localStorage.setItem('aar_dist', dt); } catch (e) {}
+}
+
+/* ---------------------------------------------------------- officers */
+function drawOfficers(q = '') {
+  const H = R.H, rows = [];
+  const add = (lv, id) => (R.OFF[id] || []).forEach(o => rows.push([lv, id, o]));
+  Object.keys(H.circles).forEach(c => add('circle', c));
+  Object.keys(H.divisions).forEach(v => add('division', v));
+  Object.keys(H.subdivs).forEach(s => add('subdivision', s));
+  Object.keys(H.sections).forEach(s => add('section', s));
+  const ql = q.toLowerCase();
+  const list = rows.filter(([lv, id, o]) => inScope(lv, id) && (!ql || (unitName(lv, id) + ' ' + o.n + ' ' + o.m + ' ' + (R.H.districts[distOf(lv, id)]?.n || '')).toLowerCase().includes(ql)));
+  $('main').innerHTML = `<div class="row" style="margin-bottom:12px"><input class="srch" id="osrch" placeholder="Find an office, officer, district or number" value="${esc(q)}"><span class="sub">${NF.format(list.length)} posts</span></div>
+   <div class="card scroll"><table class="stack"><thead><tr><th>Office</th><th>Level</th><th>District</th><th>Post</th><th>Officer</th><th>Mobile</th></tr></thead><tbody>
+   ${list.slice(0, 400).map(([lv, id, o]) => `<tr><td><b>${esc(unitName(lv, id))}</b><span class="g">${esc(parentLine(lv, id).split(' · ')[0])}</span></td><td>${LV[lv]}</td><td>${esc(R.H.districts[distOf(lv, id)]?.n || '')}</td><td>${esc(o.p)}</td><td>${esc(o.n)}</td><td class="num">${esc(o.m)}</td></tr>`).join('')}</tbody></table>
+   ${list.length > 400 ? `<div class="sub" style="padding:8px">Showing 400 of ${NF.format(list.length)}. Type to narrow the list.</div>` : ''}</div>`;
+  const s = $('osrch'); s.oninput = () => { const p = s.selectionStart; drawOfficers(s.value); const n = $('osrch'); n.focus(); n.setSelectionRange(p, p); };
+}
+
+/* ---------------------------------------------------------- PDF (Review Report look) */
+let jsp = null;
+function loadPdf() {
+  if (jsp) return jsp;
+  const add = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  jsp = add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(() => add('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js')).catch(e => { jsp = null; throw e; });
+  return jsp;
+}
+function fitText(doc, t, x, y, maxW, size, minSize, style = 'normal') {
+  t = String(t).replace(/₹/g, 'Rs ').replace(/–/g, '-');
+  let s = size; doc.setFont('times', style);
+  while (s > minSize) { doc.setFontSize(s); if (doc.getTextWidth(t) <= maxW) break; s -= 0.5; }
+  doc.setFontSize(s); let out = String(t);
+  while (doc.getTextWidth(out) > maxW && out.length > 3) out = out.slice(0, -4) + '...';
+  doc.text(out, x, y);
+}
+function pdfStart(title, subtitle) {
+  const {jsPDF} = window.jspdf, doc = new jsPDF({unit: 'pt', format: 'a4'}), W = doc.internal.pageSize.getWidth(), M = 36;
+  doc.setFillColor(234, 241, 251); doc.setDrawColor(143, 174, 221); doc.setLineWidth(1.3); doc.rect(M, M, W - 2 * M, 62, 'FD');
+  doc.setDrawColor(201, 162, 39); doc.setLineWidth(2); doc.line(M, M + 64, W - M, M + 64);
+  doc.setTextColor(45, 59, 85); fitText(doc, 'Energy Department, Bihar – All-Agenda Review', M + 10, M + 14, 300, 8.5, 7);
+  const made = 'Made on ' + new Date().toLocaleString('en-IN', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false});
+  doc.setFontSize(8.5); doc.text(made, W - M - 10 - doc.getTextWidth(made), M + 14);
+  doc.setTextColor(22, 41, 77); fitText(doc, title, M + 10, M + 36, W - 2 * M - 20, 15, 10, 'bold');
+  doc.setTextColor(45, 59, 85); fitText(doc, subtitle, M + 10, M + 52, W - 2 * M - 20, 9.5, 7.5);
+  return {doc, W, M, y: M + 82};
+}
+function pdfHead(P, t) {
+  const {doc, W, M} = P;
+  if (P.y > doc.internal.pageSize.getHeight() - 120) { doc.addPage(); P.y = M; }
+  doc.setFillColor(234, 241, 251); doc.setDrawColor(143, 174, 221); doc.setLineWidth(1.3); doc.rect(M, P.y, W - 2 * M, 20, 'FD');
+  doc.setFillColor(31, 78, 154); doc.rect(M, P.y, 5, 20, 'F'); doc.setTextColor(22, 41, 77); fitText(doc, t, M + 12, P.y + 14, W - 2 * M - 20, 11, 8, 'bold');
+  P.y += 26;
+}
+const pt = v => String(v ?? '').replace(/₹/g, 'Rs ').replace(/–/g, '-').replace(/[^\x00-\xFF·]/g, '');
+const plain = html => (document.createRange().createContextualFragment('<div>' + html.replace(/<div/g, ' · <div').replace(/<\/b>/g, '</b> ') + '</div>').textContent || '').replace(/\s+/g, ' ').replace(/^\s*·\s*/, '').trim();
+function pdfTable(P, head, body, leftCols = [0]) {
+  head = head.map(pt); body = body.map(r => r.map(pt));
+  const cs = {}; leftCols.forEach(c => cs[c] = {halign: 'left'});
+  P.doc.autoTable({startY: P.y, head: [head], body, margin: {left: P.M, right: P.M}, theme: 'grid', styles: {font: 'times', fontSize: 8.4, cellPadding: 3, lineColor: [95, 102, 110], lineWidth: 0.7, textColor: [29, 36, 51], halign: 'center', valign: 'middle', overflow: 'linebreak'},
+    headStyles: {fillColor: [220, 232, 247], textColor: [22, 41, 77], fontStyle: 'bold', halign: 'center'}, alternateRowStyles: {fillColor: [248, 250, 253]}, columnStyles: cs,
+    tableLineColor: [51, 51, 51], tableLineWidth: 1.2});
+  P.y = P.doc.lastAutoTable.finalY + 12;
+}
+function pdfTiles(P, tiles) {
+  const {doc, W, M} = P, cols = [[47, 109, 181], [46, 139, 87], [192, 57, 43], [201, 162, 39], [122, 101, 194], [15, 159, 143]];
+  const per = 6, gap = 6, w = (W - 2 * M - gap * (per - 1)) / per;
+  tiles.forEach((t, i) => {
+    if (i && i % per === 0) P.y += 46;
+    const x = M + (i % per) * (w + gap);
+    doc.setDrawColor(95, 102, 110); doc.setLineWidth(1); doc.setFillColor(255, 255, 255); doc.rect(x, P.y, w, 40, 'FD');
+    doc.setFillColor(...cols[i % 6]); doc.rect(x, P.y, w, 3, 'F');
+    doc.setTextColor(102, 112, 133); fitText(doc, t[0], x + 4, P.y + 14, w - 8, 7.5, 5.5);
+    doc.setTextColor(22, 41, 77); fitText(doc, t[1], x + 4, P.y + 31, w - 8, 11, 7, 'bold');
+  });
+  P.y += 52;
+}
+function pdfFooter(doc, name) {
+  const n = doc.getNumberOfPages(), W = doc.internal.pageSize.getWidth(), Hh = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setDrawColor(220, 224, 232); doc.setLineWidth(0.5); doc.line(36, Hh - 28, W - 36, Hh - 28); doc.setTextColor(120, 128, 140); fitText(doc, name, 36, Hh - 16, W - 160, 8, 6); doc.setFontSize(8); const p = 'Page ' + i + ' of ' + n; doc.text(p, W - 36 - doc.getTextWidth(p), Hh - 16); }
+}
+async function pdfSave(doc, fname) {
+  const blob = doc.output('blob');
+  try {
+    const dl = window.claude && await Promise.race([window.claude.use('downloads'), new Promise(r => setTimeout(() => r(null), 3000))]);
+    if (dl) { await dl.save({filename: fname, data: blob}); toast('PDF ready: ' + esc(fname)); return; }
+  } catch (e) { if (e && e.code === 'declined') { toast('The PDF was not saved.'); return; } }
+  try { doc.save(fname); } catch (e) {}
+  const url = URL.createObjectURL(blob);
+  toast(`PDF made. <a href="${url}" target="_blank" rel="noopener">Open the PDF</a>`, 12000);
+}
+const dstamp = () => new Date().toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'}).replace(/ /g, '-');
+const cell = (ak, k, u) => !u || u[k.k] == null ? '' : (ak === 'outage' && k.k === 'aof' ? hm(u[k.k]) : fmt(u[k.k], k.f));
+async function pdfDistrict(dt) {
+  try { await loadPdf(); } catch (e) { toast('Could not make the PDF: check the internet connection and try again.'); return; }
+  const H = R.H, D = H.districts[dt], divs = divsOf(dt), subs = unitsOf('subdivision', dt), secs = unitsOf('section', dt);
+  const P = pdfStart(D.n + ' district review', `${scope} > ${H.circles[D.pc]?.n || ''} circle > ${D.n}   ·   Figures as on 25 Nov 2026`);
+  const tiles = [];
+  for (const ak of ORDER) {
+    const A = R.AG[ak]; const b = A.L.district?.[dt] || (A.L.division ? sumUnits(ak, 'division', divs) : null); if (!b) continue;
+    const k = A.kpis.filter(x => x.f && (!x.lv || x.lv.includes('district'))).find(x => x.primary) || A.kpis[0];
+    if (k && b[k.k] != null) tiles.push([A.t, cell(ak, k, b)]);
+  }
+  pdfTiles(P, tiles);
+  const offs = [];
+  D.c.forEach(c => (R.OFF[c] || []).forEach(o => offs.push([H.circles[c].n + ' circle', o.p, o.n, o.m])));
+  divs.forEach(v => (R.OFF[v] || []).forEach(o => offs.push([titled(H.divisions[v].n) + ' division', o.p, o.n, o.m])));
+  if (offs.length) { pdfHead(P, 'Officers'); pdfTable(P, ['Office', 'Post', 'Officer', 'Mobile'], offs); }
+  const pend = R.PEND[dt] || [];
+  if (pend.length) {
+    pdfHead(P, 'Pending issues');
+    pdfTable(P, ['Agenda', 'Issue'], pend.map(it => [R.AG[it.src]?.t || '', plain(itemHtml(it))]), [0, 1]);
+  }
+  const NW = newsOf(dt);
+  if (NW.length) {
+    pdfHead(P, D.n + ' in the news (' + R.NEWS.paper + ', ' + R.NEWS.date + ')');
+    const ph = P.doc.internal.pageSize.getHeight(), cw = P.W - 2 * P.M;
+    for (const c of NW) {
+      let data = null;
+      try { const bl = await (await fetch(c.f)).blob(); data = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(bl); }); } catch (e) { data = null; }
+      if (!data) continue;
+      let w = Math.min(cw, c.w * 0.5), h = w * c.h / c.w;
+      const maxH = ph - 2 * P.M - 40; if (h > maxH) { h = maxH; w = h * c.w / c.h; }
+      if (P.y + h + 18 > ph - P.M) { P.doc.addPage(); P.y = P.M; }
+      P.doc.addImage(data, 'JPEG', P.M, P.y, w, h); P.doc.setDrawColor(95, 102, 110); P.doc.setLineWidth(0.7); P.doc.rect(P.M, P.y, w, h);
+      P.doc.setFont('times', 'normal'); P.doc.setFontSize(8.5); P.doc.setTextColor(80, 88, 104); P.doc.text(pt(c.place + ' · page ' + c.p), P.M, P.y + h + 10);
+      P.y += h + 20;
+    }
+  }
+  for (const ak of ORDER) {
+    const A = R.AG[ak];
+    const ks = tabKpis(ak, 'division'), Lv = A.L.division || {}, dvRows = divs.filter(v => Lv[v]);
+    const dk = tabKpis(ak, 'district');
+    const hasD = A.L.district?.[dt];
+    if (!dvRows.length && !hasD) continue;
+    pdfHead(P, A.t + ' (as on ' + A.asof + ')');
+    if (hasD) pdfTable(P, ['District', ...dk.map(k => k.l)], [[D.n, ...dk.map(k => cell(ak, k, A.L.district[dt]))]]);
+    if (dvRows.length && ks.length) pdfTable(P, ['Division', ...ks.map(k => k.l)], dvRows.map(v => [titled(H.divisions[v].n) + (officer(v, 'EEE') ? '\n' + officer(v, 'EEE') : ''), ...ks.map(k => cell(ak, k, Lv[v]))]));
+    for (const lv of ['subdivision', 'section']) {
+      const kk = kpisAt(ak, lv); if (!kk.length) continue;
+      const k = kk.find(x => x.primary) || kk[0], r = ranked(ak, lv, k.k, lv === 'section' ? secs : subs);
+      if (r.length < 2) continue;
+      const n = Math.min(5, Math.floor(r.length / 2)), L = A.L[lv];
+      const rowsOf = (arr, tagw) => arr.map((x, i) => [tagw + ' ' + (i + 1), titled(unitName(lv, x.id)) + (parentLine(lv, x.id) ? '\n' + parentLine(lv, x.id) : ''), cell(ak, k, L[x.id])]);
+      pdfTable(P, ['', LV[lv], k.l], [...rowsOf(r.slice(0, n), 'Top'), ...rowsOf(r.slice(-n).reverse(), 'Bottom')]);
+    }
+  }
+  const cmd = R.AG.cmd.items[dt] || [];
+  if (cmd.length) { pdfHead(P, D.n + ' in the CMD Cell agenda'); pdfTable(P, ['Agenda', 'Line'], cmd.map(x => [x.tab, x.txt]), [0, 1]); }
+  pdfFooter(P.doc, 'All-Agenda Review · ' + scope + ' > ' + D.n);
+  await pdfSave(P.doc, `District_Review_${D.n.replace(/[^A-Za-z]+/g, '_')}_${dstamp()}.pdf`);
+}
+async function pdfOverview() {
+  try { await loadPdf(); } catch (e) { toast('Could not make the PDF: check the internet connection and try again.'); return; }
+  const P = pdfStart('Overview – top 10 and bottom 10 by agenda', `${scope}   ·   ${LV[level]} level   ·   Figures as on 25 Nov 2026`);
+  for (const ak of ORDER) {
+    const ks = kpisAt(ak, level); if (!ks.length || !R.AG[ak].L[level]) continue;
+    const k = ks.find(x => x.k === sel[ak + '|' + level]) || ks.find(x => x.primary) || ks[0], r = ranked(ak, level, k.k);
+    if (!r.length) continue;
+    const L = R.AG[ak].L[level], n = Math.min(10, Math.floor(r.length / 2)) || 1;
+    pdfHead(P, R.AG[ak].t + ' · ' + k.l);
+    const rows = (arr, off, rev) => arr.map((x, i) => [rev ? r.length - i : i + 1, unitName(level, x.id) + (parentLine(level, x.id) ? '\n' + parentLine(level, x.id) : ''), cell(ak, k, L[x.id])]);
+    pdfTable(P, ['Rank', LV[level], k.l], [...rows(r.slice(0, n), 0, false), ...rows(r.slice(-n).reverse(), 0, true)]);
+  }
+  pdfFooter(P.doc, 'All-Agenda Review · Overview · ' + scope);
+  await pdfSave(P.doc, `Overview_${scope}_${LV[level].replace(/-/g, '')}_${dstamp()}.pdf`);
+}
+
+/* ---------------------------------------------------------- frame */
+function setScope(s) {
+  scope = s; const c = SC[s], st = document.documentElement.style;
+  ['--t1', '--t2', '--tl', '--td'].forEach((v, i) => st.setProperty(v, c[i]));
+  document.querySelectorAll('#scope button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  draw();
+}
+function draw() {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  const dd = $('pdfdd');
+  dd.innerHTML = tab === 'district' && curDist ? `<button data-p="d">This district (${esc(R.H.districts[curDist]?.n || '')})</button><button data-p="o">Overview at ${esc(LV[level])} level</button>` : `<button data-p="o">Overview at ${esc(LV[level])} level</button>`;
+  if (tab === 'overview') drawOverview(); else if (tab === 'district') drawDistrict(); else drawOfficers();
+  if (tab === 'district') dd.innerHTML = `<button data-p="d">This district (${esc(R.H.districts[curDist]?.n || '')})</button><button data-p="o">Overview at ${esc(LV[level])} level</button>`;
+  if (location.hash.slice(1) !== tab) history.replaceState(null, '', '#' + tab);
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('#pres')) return;
+  const t = e.target.closest('button,[data-id]');
+  if (!t) { $('pdfm').classList.remove('open'); return; }
+  if (t.closest('#scope') && t.dataset.s) return setScope(t.dataset.s);
+  if (t.closest('#tabs') && t.dataset.t) { tab = t.dataset.t; return draw(); }
+  if (t.closest('#lvls') && t.dataset.lv) { level = t.dataset.lv; return draw(); }
+  if (t.id === 'pdfb') { $('pdfm').classList.toggle('open'); return; }
+  if (t.dataset.p) { $('pdfm').classList.remove('open'); return t.dataset.p === 'd' ? pdfDistrict(curDist) : pdfOverview(); }
+  if (t.id === 'refresh') return load();
+  if (t.dataset.jump) { const el = $(t.dataset.jump); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
+  if (t.dataset.ag && tab === 'overview') { const el = document.querySelector(`select[data-sel^="${t.dataset.ag}|"]`); if (el) el.closest('.ag').scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
+  if (t.classList.contains('rk')) { const d = distOf(t.dataset.lv, t.dataset.id); if (d) { curDist = d; tab = 'district'; draw(); window.scrollTo(0, 0); } }
+  $('pdfm').classList.remove('open');
+});
+function openClip(key) {
+  const [dt, i] = key.split('|'), c = newsOf(dt)[+i]; if (!c) return;
+  $('lbimg').src = c.f; $('lbimg').alt = 'News clipping, ' + c.place;
+  $('lbcap').textContent = `${c.hl ? c.hl + ' · ' : ''}${c.place} · ${R.NEWS.paper}, ${R.NEWS.date} · page ${c.p}`;
+  $('lb').classList.remove('hide');
+}
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-clip]'); if (c) { e.stopPropagation(); openClip(c.dataset.clip); return; }
+  if (e.target.id === 'lb' || e.target.id === 'lbx') $('lb').classList.add('hide');
+}, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('lb').classList.contains('hide')) { e.stopImmediatePropagation(); $('lb').classList.add('hide'); } }, true);
+/* ---------------------------------------------------------- presenter */
+const P_ = {mode: 'agenda', i: 0, lv: null, t: null};
+function pSlides() {
+  if (P_.mode === 'agenda') {
+    const lvs = Object.keys(LV).filter(lv => ORDER.some(ak => R.AG[ak].L[lv] && kpisAt(ak, lv).length));
+    if (!P_.lv || !lvs.includes(P_.lv)) P_.lv = lvs.includes(level) ? level : lvs[0];
+    return ORDER.filter(ak => agCard(ak, P_.lv, 10)).map(ak => ({ak}));
+  }
+  return districtList().flatMap(g => g.ds.map(dt => ({dt, c: g.c})));
+}
+function pAgenda(ak) {
+  const box = document.createElement('div'); box.innerHTML = headTiles();
+  const tile = box.querySelector(`[data-ag="${ak}"]`);
+  return `<div class="slide"><div class="shd"><h1>${esc(R.AG[ak].t)}</h1><span class="sub">${esc(scope)} · ${esc(LV[P_.lv])} level · as on ${esc(R.AG[ak].asof)}</span></div>
+    ${tile ? `<div class="ptile">${tile.outerHTML}</div>` : ''}${agCard(ak, P_.lv, 10)}</div>`;
+}
+function pDistrict(dt) {
+  const H = R.H, D = H.districts[dt], divs = divsOf(dt);
+  const circles = D.c.filter(c => scope === 'Bihar' || H.circles[c].d === scope);
+  const UN = {section: unitsOf('section', dt), subdivision: unitsOf('subdivision', dt), substation: Object.keys(R.SS).filter(id => R.SS[id].t === dt), division: divs};
+  const boxes = ORDER.map(ak => {
+    const A = R.AG[ak];
+    let tb = '';
+    for (const lv of ['section', 'subdivision', 'substation', 'division']) { tb = fiveBox(ak, lv, UN[lv]); if (tb) break; }
+    const b = A.L.district && A.L.district[dt] ? A.L.district[dt] : (A.L.division ? sumUnits(ak, 'division', divs) : null);
+    if (!b) return '';
+    let body = keyStrip(ak, b);
+    if (!body) {
+      const ks = kpisAt(ak, 'district').length ? kpisAt(ak, 'district') : kpisAt(ak, 'division');
+      const cells = ks.filter(k => b[k.k] != null && !isNaN(b[k.k])).slice(0, 5).map(k => `<div class="kf"><span>${esc(k.l)}</span><b>${ak === 'outage' && k.k === 'aof' ? hm(b[k.k]) : fmt(b[k.k], k.f)}</b></div>`);
+      if (!cells.length) return '';
+      body = `<div class="kfs">${cells.join('')}</div>`;
+    }
+    return `<section class="agbox" style="--c:${COL[ak]}"><div class="sechd"><h3>${esc(A.t)}</h3>${A.asof ? `<span class="sub">${/^(updated|read)/.test(A.asof) ? '' : 'as on '}${esc(A.asof)}</span>` : ''}</div>${body}${tb ? `<div class="ptb">${tb}</div>` : ''}</section>`;
+  }).join('');
+  const offs = [];
+  circles.forEach(c => (R.OFF[c] || []).forEach(o => offs.push(o.p + ' ' + o.n + (o.m ? ' (' + o.m + ')' : ''))));
+  if (divs.length <= 4) divs.forEach(v => (R.OFF[v] || []).forEach(o => offs.push(o.p + ' ' + titled(H.divisions[v].n) + ': ' + o.n)));
+  const PA = R.PEND[dt] || [];
+  const pend = PA.slice(0, 8).map(it => `<div class="pi"><span class="pt">${esc(R.AG[it.src]?.t || '')}</span>${itemHtml(it)}</div>`).join('');
+  const pendBox = PA.length ? `<section class="agbox pbox" style="--c:#8a6d3b"><div class="sechd"><h3>Pending issues</h3><span class="sub">${PA.length} open</span></div>${pend}${PA.length > 8 ? `<div class="sub" style="margin-top:6px">and ${PA.length - 8} more in the District review tab</div>` : ''}</section>` : '';
+  return `<div class="slide"><div class="shd"><div><h1>${esc(D.n)}</h1><div class="sub" style="margin-top:4px">${circles.map(c => esc(H.circles[c].n) + ' circle (' + esc(H.circles[c].d) + ')').join(', ')} · ${divs.length} division${divs.length > 1 ? 's' : ''}</div></div>
+    ${offs.length ? `<div class="sub" style="max-width:820px">${offs.map(esc).join(' · ')}</div>` : ''}</div>
+    <div class="pgrid">${boxes}${pendBox}${newsOf(dt).length ? `<section class="agbox" style="--c:#3b6e8f"><div class="sechd"><h3>In the news</h3><span class="sub">${esc(R.NEWS.date)} · ${newsOf(dt).length} clipping${newsOf(dt).length > 1 ? 's' : ''}</span></div>${newsHtml(dt, 'sm')}</section>` : ''}</div></div>`;
+}
+function pDraw() {
+  const sl = pSlides(); if (!sl.length) { $('pbody').innerHTML = '<div class="card">No figures to show yet.</div>'; return; }
+  P_.i = Math.max(0, Math.min(P_.i, sl.length - 1));
+  const cur = sl[P_.i];
+  $('pbody').innerHTML = cur.ak ? pAgenda(cur.ak) : pDistrict(cur.dt);
+  $('pbody').scrollTop = 0;
+  document.querySelectorAll('#pmode button').forEach(b => b.classList.toggle('on', b.dataset.pm === P_.mode));
+  const lvs = Object.keys(LV).filter(lv => ORDER.some(ak => R.AG[ak].L[lv] && kpisAt(ak, lv).length));
+  $('plvl').innerHTML = P_.mode === 'agenda' ? lvs.map(lv => `<button data-plv="${lv}" class="${lv === P_.lv ? 'on' : ''}">${esc(LV[lv])}</button>`).join('') : '';
+  $('plvl').classList.toggle('hide', P_.mode !== 'agenda');
+  const name = cur.ak ? R.AG[cur.ak].t : R.H.districts[cur.dt].n;
+  $('pcount').textContent = `${P_.i + 1} of ${sl.length} · ${name}`;
+  $('pprev').disabled = P_.i === 0; $('pnext').disabled = P_.i === sl.length - 1;
+  pFit(); pTimer();
+}
+function pFit() {
+  const sl = $('pbody').querySelector('.slide'); if (!sl) return;
+  sl.style.zoom = 1;
+  $('pres').classList.toggle('fit', $('pfit').checked && innerWidth >= 700);
+  if (!$('pfit').checked || innerWidth < 700) return;
+  const avail = $('pbody').clientHeight - 38;
+  for (let n = 0; n < 3; n++) { const h = sl.getBoundingClientRect().height; const z = +(sl.style.zoom || 1); if (h <= avail + 1) break; sl.style.zoom = Math.max(0.45, z * avail / h).toFixed(3); }
+}
+function pGo(d) { const n = pSlides().length; const j = P_.i + d; if (j >= 0 && j < n) { P_.i = j; pDraw(); } else if ($('pauto').checked && j >= n) { P_.i = 0; pDraw(); } }
+function pTimer() { clearTimeout(P_.t); if ($('pauto').checked && !$('pres').classList.contains('hide')) P_.t = setTimeout(() => pGo(1), (+$('psec').value || 30) * 1000); }
+function pOpen() {
+  if (!R) return;
+  P_.mode = 'district';
+  { const ds = pSlides().map(x => x.dt); P_.i = Math.max(0, ds.indexOf(curDist)); }
+  $('pres').classList.remove('hide'); document.body.style.overflow = 'hidden';
+  try { const fs = document.documentElement.requestFullscreen; if (fs) document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
+  pDraw();
+}
+function pClose() {
+  clearTimeout(P_.t); $('pres').classList.add('hide'); document.body.style.overflow = '';
+  try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {}
+}
+$('presb').onclick = pOpen;
+$('pclose').onclick = pClose;
+$('pprev').onclick = () => pGo(-1);
+$('pnext').onclick = () => pGo(1);
+$('pauto').onchange = pTimer; $('psec').onchange = pTimer; $('pfit').onchange = pFit;
+addEventListener('resize', () => { if (!$('pres').classList.contains('hide')) pFit(); });
+document.addEventListener('fullscreenchange', () => setTimeout(() => { if (!$('pres').classList.contains('hide')) pFit(); }, 150));
+$('pres').addEventListener('click', e => {
+  const t = e.target.closest('[data-pm],[data-plv],[data-pi]'); if (!t) return;
+  if (t.dataset.pm) { if (P_.mode !== t.dataset.pm) { P_.mode = t.dataset.pm; P_.i = 0; } }
+  else if (t.dataset.plv) P_.lv = t.dataset.plv;
+  else P_.i = +t.dataset.pi;
+  pDraw();
+});
+$('pres').addEventListener('change', e => { if (e.target.dataset.sel) { sel[e.target.dataset.sel] = e.target.value; pDraw(); } });
+document.addEventListener('keydown', e => {
+  if ($('pres').classList.contains('hide')) return;
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); pGo(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); pGo(-1); }
+  else if (e.key === 'Escape') pClose();
+  else if (e.key === 'Home') { P_.i = 0; pDraw(); }
+  else if (e.key === 'End') { P_.i = pSlides().length - 1; pDraw(); }
+});
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && !$('pres').classList.contains('hide')) { /* stays open in the page */ } });
+document.addEventListener('change', e => { if (e.target.dataset.sel) { sel[e.target.dataset.sel] = e.target.value; draw(); } });
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (['overview', 'district', 'officers'].includes(h) && h !== tab) { tab = h; draw(); } });
+async function load() {
+  $('main').innerHTML = '<div class="center"><div><div class="spin"></div><p>Loading the figures …</p></div></div>';
+  try {
+    const r = await fetch('review.json', {cache: 'no-store'}); if (!r.ok) throw 0;
+    R = await r.json();
+  } catch (e) {
+    $('main').innerHTML = '<div class="center"><div class="card"><h3>Could not load the figures</h3><button class="btn main" id="retry">Try again</button></div></div>';
+    $('retry').onclick = load; return;
+  }
+  divTot = {};
+  Object.values(R.H.districts).forEach(d => (d.v || []).forEach(([v, n]) => divTot[v] = (divTot[v] || 0) + n));
+  $('asof').textContent = 'As on 25 Nov 2026 · made ' + R.generated;
+  try { const s = localStorage.getItem('aar_dist'); if (s) curDist = s; } catch (e) {}
+  const h = location.hash.slice(1); if (['overview', 'district', 'officers'].includes(h)) tab = h;
+  setScope(scope);
+}
+load();
+}
+</script>
+</body>
+</html>

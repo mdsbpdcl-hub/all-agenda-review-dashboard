@@ -19,3 +19,13 @@ Circle-, district-, division-, sub-division- and section-wise review of Energy D
 3. **Tag automatically every morning** – daily at about 10:15 IST.
 
 The Google account that runs it needs edit access to each dashboard spreadsheet in `SOURCES`.
+
+
+## All-Agenda Review (meeting dashboard)
+
+- `docs/` - the review page (`index.html`), its figures (`review.json`) and the day's district news clippings (`news/`).
+- `build/` - the build: `fetch.py` (downloads every source with a Google service account), `make_news.py`, `build_review.py`,
+  `update.sh` (runs it all), `fallback/` (yesterday's copy of each source, used when a sheet cannot be read), `headlines/` (optional Hindi headlines per paper).
+- `.github/workflows/update-review.yml` - runs `build/update.sh` at 10:30 and 12:00 IST and commits the new figures.
+  Needs the repository secret `GOOGLE_SA_KEY` (service account JSON key); every source in `build/sources.json` must be shared with that account as Viewer.
+- `apps-script/review-web-app/` - the web app that serves the page (paste `Code.gs`, deploy as a web app).
