@@ -21,11 +21,12 @@ Circle-, district-, division-, sub-division- and section-wise review of Energy D
 The Google account that runs it needs edit access to each dashboard spreadsheet in `SOURCES`.
 
 
-## All-Agenda Review (meeting dashboard)
+## All-Agenda Review (meeting dashboard) - runs without Claude
 
-- `docs/` - the review page (`index.html`), its figures (`review.json`) and the day's district news clippings (`news/`).
-- `build/` - the build: `fetch.py` (downloads every source with a Google service account), `make_news.py`, `build_review.py`,
-  `update.sh` (runs it all), `fallback/` (yesterday's copy of each source, used when a sheet cannot be read), `headlines/` (optional Hindi headlines per paper).
-- `.github/workflows/update-review.yml` - runs `build/update.sh` at 10:30 and 12:00 IST and commits the new figures.
-  Needs the repository secret `GOOGLE_SA_KEY` (service account JSON key); every source in `build/sources.json` must be shared with that account as Viewer.
-- `apps-script/review-web-app/` - the web app that serves the page (paste `Code.gs`, deploy as a web app).
+1. `apps-script/review-updater/Updater.gs` (Apps Script, runs as the sheet owner at ~10:15 and ~11:45 IST) reads the dashboard
+   sheets, DM feedback, the pending-issues file and the newest news clippings, and saves them in one commit to
+   `build/data_in/` and `docs/news/` (needs script property `GITHUB_TOKEN`).
+2. `.github/workflows/update-review.yml` runs on that commit: `build/build_from_inputs.sh` builds `docs/review.json`.
+3. `apps-script/review-web-app/Code.gs` serves `docs/index.html` with its figures as a web app.
+
+`build/` also keeps `fetch.py`/`update.sh` (service-account route) and `RUNBOOK.md` (manual route), not needed for the above.
