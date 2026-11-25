@@ -37,7 +37,7 @@ main{max-width:1360px;margin:auto;padding:18px 24px 60px}
 h2{font-size:19px;margin:22px 0 10px;font-weight:800}h3{font-size:16px;margin:0 0 8px;font-weight:800}
 .sub{color:var(--mut);font-size:13px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px}
-.kpi{background:#fff;border:1px solid var(--line);border-left:4px solid var(--c,var(--t1));border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left}
+.kpi.still{cursor:default}.kpi{background:#fff;border:1px solid var(--line);border-left:4px solid var(--c,var(--t1));border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left}
 .kpi .l{font-size:12.5px;color:var(--mut);font-weight:700}.kpi .v{font-size:23px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:lining-nums tabular-nums}.kpi .n{font-size:12px;color:var(--fnt)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700;border:1px solid var(--line);background:#fff;white-space:nowrap}
@@ -270,7 +270,8 @@ function headTiles() {
     const kp = R.AG[ak].kpis.find(x => x.k === k);
     let v = fmt(t[k], kp.f); if (ak === 'outage') v = hm(t[k]) + ' <span style="font-size:12px;color:var(--mut)">hr:min</span>';
     if (/₹ lakh/.test(kp.l)) v = '₹' + NF.format(Math.round(t[k])) + ' <span style="font-size:12px;color:var(--mut)">lakh</span>';
-    out.push(`<button class="kpi" style="--c:${COL[ak]}" data-ag="${ak}"><div class="l">${esc(R.AG[ak].t)}</div><div class="v">${v}</div><div class="n">${esc(kp.l)}${note ? ' · ' + esc(note) : ''}</div></button>`);
+    const tagN = ORDER.includes(ak) ? 'button' : 'div';   // only agendas with a ranking card below are clickable
+    out.push(`<${tagN} class="kpi${tagN === 'div' ? ' still' : ''}" style="--c:${COL[ak]}" data-ag="${ak}"><div class="l">${esc(R.AG[ak].t)}</div><div class="v">${v}</div><div class="n">${esc(kp.l)}${note ? ' · ' + esc(note) : ''}</div></${tagN}>`);
   };
   add('outage', 'aof', t => NF.format(t.o4) + ' feeders out over 4 hrs');
   add('pmsg', 'inst', t => [t.app != null && NF.format(t.app) + ' applications', t.a7 != null && NF.format(t.a7) + ' applied in last 7 days', t.l7 != null && NF.format(t.l7) + ' in last 7 days', t.pend != null && NF.format(t.pend) + ' installation pending', t.pt != null && NF1.format(t.pt) + '% of target'].filter(Boolean).join(' · '));
@@ -285,7 +286,7 @@ function headTiles() {
   }
   add('offgrid', 'dp', t => NF.format(t.hh) + ' households to connect' + (t.noc ? ' · ' + NF.format(t.noc) + ' NOCs and clearances pending' : ''));
   add('dmfb', 'open', t => 'from District Magistrates');
-  if (R.NEWS) { const ds = Object.keys(R.NEWS.by).filter(id => inScope('district', id)); const n = ds.reduce((a, d) => a + R.NEWS.by[d].length, 0); if (n) out.push(`<button class="kpi" style="--c:#3b6e8f" data-jumpnews="1"><div class="l">BSPHCL Daily News Briefing</div><div class="v">${NF.format(n)}</div><div class="n">News clippings, ${esc(R.NEWS.date)} · ${NF.format(ds.length)} districts</div></button>`); }
+  if (R.NEWS) { const ds = Object.keys(R.NEWS.by).filter(id => inScope('district', id)); const n = ds.reduce((a, d) => a + R.NEWS.by[d].length, 0); if (n) out.push(`<div class="kpi still" style="--c:#3b6e8f"><div class="l">BSPHCL Daily News Briefing</div><div class="v">${NF.format(n)}</div><div class="n">News clippings, ${esc(R.NEWS.date)} · ${NF.format(ds.length)} districts</div></div>`); }
   add('dpi', 'n', t => 'across ' + NF.format(Object.keys(R.AG.dpi.L.district || {}).filter(id => inScope('district', id)).length) + ' districts');
   return out.join('');
 }

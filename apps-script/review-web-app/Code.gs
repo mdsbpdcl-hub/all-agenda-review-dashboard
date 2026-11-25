@@ -10,7 +10,9 @@ const CONFIG = {
   RAW_BASE: 'https://raw.githubusercontent.com/mdsbpdcl-hub/all-agenda-review-dashboard/main/docs/',
   TITLE: 'All-Agenda Review',
   CACHE_SECONDS: 300,                 // page shell cached 5 minutes; figures are always read fresh by the page
-  // Leave empty for open access. To restrict: list Gmail IDs, and redeploy with "Anyone with Google account".
+  // Leave empty for open access. To restrict: list Gmail IDs here, then redeploy with
+  // Execute as: "User accessing the web app" and Who has access: "Anyone with Google account"
+  // (when it runs as you, Google does not tell the script who the visitor is).
   ALLOWED_EMAILS: []
 };
 

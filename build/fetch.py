@@ -51,7 +51,7 @@ for key, out in (('nfms_latest', 'nfms_latest.json'), ('rdss_latest', 'rdss_late
 news = {'date': None}
 try:
     q = "'%s' in parents and name contains 'manifest' and trashed = false" % S['news_prepared_folder']
-    files = drive.files().list(q=q, orderBy='createdTime desc', pageSize=5, fields='files(id,name)').execute().get('files', [])
+    files = drive.files().list(q=q, orderBy='createdTime desc', pageSize=5, fields='files(id,name,createdTime)').execute().get('files', [])
     if files:
         man = files[0]; m = re.match(r'prep_(.+)_(\d+)\.manifest\.json$', man['name']); paper = m.group(1)
         save(drive.files().get_media(fileId=man['id']), os.path.join(B, 'news_raw', man['name']))
@@ -59,9 +59,15 @@ try:
         for p in parts:
             f = drive.files().list(q="'%s' in parents and name = '%s'" % (S['news_prepared_folder'], p), fields='files(id)').execute()['files'][0]
             save(drive.files().get_media(fileId=f['id']), os.path.join(B, 'news_raw', p))
-        title = drive.files().get(fileId=paper, fields='name').execute()['name']
-        d = re.search(r'(\d{1,2})[ ._-](\d{1,2})[ ._-](20\d\d)', title)
-        news['date'] = datetime.date(int(d.group(3)), int(d.group(2)), int(d.group(1))).strftime('%d %b %Y') if d else datetime.date.today().strftime('%d %b %Y')
+        d = None
+        try:
+            title = drive.files().get(fileId=paper, fields='name').execute()['name']
+            d = re.search(r'(\d{1,2})[ ._-](\d{1,2})[ ._-](20\d\d)', title)
+        except Exception as e: print('paper title not readable, using the clippings date', str(e)[:120])
+        if d: news['date'] = datetime.date(int(d.group(3)), int(d.group(2)), int(d.group(1))).strftime('%d %b %Y')
+        else:
+            made = drive.files().get(fileId=man['id'], fields='createdTime').execute()['createdTime'][:10]
+            news['date'] = datetime.date.fromisoformat(made).strftime('%d %b %Y')
         news['paper'] = paper; report['fresh'].append('news ' + news['date'])
 except Exception as e: print('news failed', e); report['failed'].append('news')
 json.dump(news, open(os.path.join(B, 'news_raw', 'paper.json'), 'w'))

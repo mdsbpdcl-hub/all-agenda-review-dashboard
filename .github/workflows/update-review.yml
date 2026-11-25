@@ -46,4 +46,5 @@ jobs:
           git add docs build/fallback
           if git diff --cached --quiet; then echo "No change"; exit 0; fi
           git commit -m "Update review figures $(TZ=Asia/Kolkata date '+%d %b %Y %H:%M')"
+          git pull --rebase -X theirs origin main || { git rebase --abort; git pull --no-rebase -X ours origin main; }
           git push
