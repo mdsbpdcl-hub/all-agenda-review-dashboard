@@ -628,7 +628,7 @@ function draw() {
   dd.innerHTML = tab === 'district' && curDist ? `<button data-p="d">This district (${esc(R.H.districts[curDist]?.n || '')})</button><button data-p="o">Overview at ${esc(LV[level])} level</button>` : `<button data-p="o">Overview at ${esc(LV[level])} level</button>`;
   if (tab === 'overview') drawOverview(); else if (tab === 'district') drawDistrict(); else drawOfficers();
   if (tab === 'district') dd.innerHTML = `<button data-p="d">This district (${esc(R.H.districts[curDist]?.n || '')})</button><button data-p="o">Overview at ${esc(LV[level])} level</button>`;
-  if (location.hash.slice(1) !== tab) history.replaceState(null, '', '#' + tab);
+  if (location.hash.slice(1) !== tab) { try { history.replaceState(null, '', location.href.split('#')[0] + '#' + tab); } catch (e) { /* page served from another address: skip */ } }
 }
 document.addEventListener('click', e => {
   if (e.target.closest('#pres')) return;
