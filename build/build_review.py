@@ -212,7 +212,7 @@ for r in rows('pmsg_regular.xlsx', 'Recent progress'):
 finish(a, lambda b: dict(pt=pct(b['inst'], b.get('tgt', 0)), pa=pct(b['inst'], b['app'])))
 for r in rows('pmsg_regular.xlsx', 'Headline KPIs'):
     a['items']['_head'].append([txt(r.get('KPI')), txt(r.get('Bihar')), txt(r.get('SBPDCL')), txt(r.get('NBPDCL'))])
-a['asof'] = '24 Nov 2026'
+a['asof'] = 'read on ' + datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).strftime('%d %b %Y')
 
 # ================================================================ 2. PMSG-MBY (ULA)
 a = agenda('ula', 'PMSG-MBY (ULA)', 'Daily Progress Report of PM Surya Ghar Yojna', '', [
@@ -422,12 +422,13 @@ for r in rows('utility.xlsx', 'UtilityShifting'):
         if not did: continue
         put(a, 'division', did, dict(tot=1 / len(dids), np=(0 if served else 1) / len(dids)))
     dt = div_dist(dids[0]) if dids and dids[0] else None
-    if r.get('Updated on'): upd.append(txt(r['Updated on']))
+    if r.get('Updated on'): upd.append(r['Updated on'])
     if dt: a['items'][dt].append(dict(k='util', v=dids[0], ag=txt(r.get('Agency')), p=txt(r.get('Name of Project /\nChainage') or r.get('Name of Project / Chainage'))[:220],
                                      at=pend_at, rem=txt(r.get('SBPDCL Remarks'))[:300], served=served))
 rollup(a, 'division', 'circle', div_cir); rollup(a, 'division', 'district', div_dist)
 finish(a, lambda b: {})
-a['asof'] = 'updated up to 19 Nov 2026' if upd else ''
+_ud = [u for u in upd if hasattr(u, 'strftime')]
+a['asof'] = ('updated up to ' + max(_ud).strftime('%d %b %Y')) if _ud else ''
 
 # ================================================================ 8. PSS projects (SBPDCL)
 a = agenda('pss', 'Project Monitoring - PSS', 'StatePlan - RDSS PSS Project Dashboard - SBPDCL', '', [

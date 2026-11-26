@@ -566,7 +566,7 @@ const cell = (ak, k, u) => !u || u[k.k] == null ? '' : (ak === 'outage' && k.k =
 async function pdfDistrict(dt) {
   try { await loadPdf(); } catch (e) { toast('Could not make the PDF: check the internet connection and try again.'); return; }
   const H = R.H, D = H.districts[dt], divs = divsOf(dt), subs = unitsOf('subdivision', dt), secs = unitsOf('section', dt);
-  const P = pdfStart(D.n + ' district review', `${scope} > ${H.circles[D.pc]?.n || ''} circle > ${D.n}   ·   Figures as on 25 Nov 2026`);
+  const P = pdfStart(D.n + ' district review', `${scope} > ${H.circles[D.pc]?.n || ''} circle > ${D.n}   ·   Figures updated ${R.generated}`);
   const tiles = [];
   for (const ak of ORDER) {
     const A = R.AG[ak]; const b = A.L.district?.[dt] || (A.L.division ? sumUnits(ak, 'division', divs) : null); if (!b) continue;
@@ -624,7 +624,7 @@ async function pdfDistrict(dt) {
 }
 async function pdfOverview() {
   try { await loadPdf(); } catch (e) { toast('Could not make the PDF: check the internet connection and try again.'); return; }
-  const P = pdfStart('Overview – top 10 and bottom 10 by agenda', `${scope}   ·   ${LV[level]} level   ·   Figures as on 25 Nov 2026`);
+  const P = pdfStart('Overview – top 10 and bottom 10 by agenda', `${scope}   ·   ${LV[level]} level   ·   Figures updated ${R.generated}`);
   for (const ak of ORDER) {
     const ks = kpisAt(ak, level); if (!ks.length || !R.AG[ak].L[level]) continue;
     const k = ks.find(x => x.k === sel[ak + '|' + level]) || ks.find(x => x.primary) || ks[0], r = ranked(ak, level, k.k);
@@ -788,21 +788,35 @@ document.addEventListener('keydown', e => {
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && !$('pres').classList.contains('hide')) { /* stays open in the page */ } });
 document.addEventListener('change', e => { if (e.target.dataset.sel) { sel[e.target.dataset.sel] = e.target.value; draw(); } });
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (['overview', 'district', 'officers'].includes(h) && h !== tab) { tab = h; draw(); } });
-async function load() {
-  $('main').innerHTML = '<div class="center"><div><div class="spin"></div><p>Loading the figures …</p></div></div>';
-  try {
-    const r = await fetch('review.json', {cache: 'no-store'}); if (!r.ok) throw 0;
-    R = await r.json();
-  } catch (e) {
-    $('main').innerHTML = '<div class="center"><div class="card"><h3>Could not load the figures</h3><button class="btn main" id="retry">Try again</button></div></div>';
-    $('retry').onclick = load; return;
+const SRC = ['review.json',
+  'https://raw.githubusercontent.com/mdsbpdcl-hub/all-agenda-review-dashboard/main/docs/review.json',
+  'https://cdn.jsdelivr.net/gh/mdsbpdcl-hub/all-agenda-review-dashboard@main/docs/review.json'];
+async function getFigures() {
+  for (let i = 0; i < SRC.length; i++) {
+    const ac = new AbortController(), t = setTimeout(() => ac.abort(), i ? 25000 : 15000);
+    try {
+      const r = await fetch(SRC[i] + (SRC[i].includes('?') ? '&' : '?') + 't=' + Date.now(), {cache: 'no-store', signal: ac.signal});
+      if (!r.ok) throw 0;
+      const j = await r.json(); clearTimeout(t); return j;
+    } catch (e) { clearTimeout(t); }
   }
-  divTot = {};
-  Object.values(R.H.districts).forEach(d => (d.v || []).forEach(([v, n]) => divTot[v] = (divTot[v] || 0) + n));
-  $('asof').textContent = 'As on 25 Nov 2026 · made ' + R.generated;
-  try { const s = localStorage.getItem('aar_dist'); if (s) curDist = s; } catch (e) {}
-  const h = location.hash.slice(1); if (['overview', 'district', 'officers'].includes(h)) tab = h;
-  setScope(scope);
+  throw 0;
+}
+async function load() {
+  $('main').innerHTML = '<div class="center"><div><div class="spin"></div><p>Loading the figures …</p><p id="slow" class="hide" style="color:#667085;font-size:13px">Slow connection, still trying …</p></div></div>';
+  const slow = setTimeout(() => { const e = $('slow'); if (e) e.classList.remove('hide'); }, 6000);
+  try { R = await getFigures(); } catch (e) { R = null; }
+  clearTimeout(slow);
+  const fail = () => { $('main').innerHTML = '<div class="center"><div class="card"><h3>Could not load the figures</h3><button class="btn main" id="retry">Try again</button></div></div>'; $('retry').onclick = load; };
+  if (!R) return fail();
+  try {
+    divTot = {};
+    Object.values(R.H.districts).forEach(d => (d.v || []).forEach(([v, n]) => divTot[v] = (divTot[v] || 0) + n));
+    $('asof').textContent = 'Updated ' + R.generated;
+    try { const s = localStorage.getItem('aar_dist'); if (s) curDist = s; } catch (e) {}
+    const h = location.hash.slice(1); if (['overview', 'district', 'officers'].includes(h)) tab = h;
+    setScope(scope);
+  } catch (e) { console.error(e); fail(); }
 }
 load();
 }
