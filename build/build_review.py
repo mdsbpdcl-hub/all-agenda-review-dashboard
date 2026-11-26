@@ -125,6 +125,18 @@ for r in rows_st('contacts.xlsx', 'NBPDCL'):
         sd, _ = tag.unit('Subdivision', 'NBPDCL', DIVS[did][1], did, txt(r.get('Subdivision'))); offer(sd, 'AEE', nm, mob, vacant_word=W)
     elif post == 'JEE' and lvl == 'Section' and did:
         se, _ = tag.unit('Section', 'NBPDCL', DIVS[did][1], did, txt(r.get('Section'))); offer(se, 'JEE', nm, mob, vacant_word=W)
+# EEE names/mobiles from the division social-media contact list (fills NBPDCL gaps)
+_eee = os.path.join(BASE, 'static', 'eee_contacts.json')
+if os.path.exists(_eee):
+    for e in json.load(open(_eee, encoding='utf-8')):
+        d, n = e.get('did'), (e.get('name') or '').strip()
+        if not d or not n: continue
+        L = OFF[d]; cur = [o for o in L if o['p'] == 'EEE']
+        if d.startswith('DV-NB-'):
+            for o in cur: L.remove(o)
+            L.insert(0, dict(p='EEE', n=n, m=txt(e.get('mobile')), s=''))
+        elif not cur:
+            L.insert(0, dict(p='EEE', n=n, m=txt(e.get('mobile')), s=''))
 OFF = {k: v[:3] for k, v in OFF.items()}
 
 # ---------------------------------------------------------------- agenda engine
